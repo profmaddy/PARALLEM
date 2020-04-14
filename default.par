@@ -1,0 +1,35 @@
+PARALLEM PARAMETER FILE
+07/04/2020
+testmod
+30mfam.asc
+climateF.txt
+soilT.tif
+0                                       #restart 0=no otherwise yes
+0                                       start value (set to restart value if required
+1                                       #Final iteration
+10                                   	#runin iterations required
+1                                       #flow routing 0=SFD oherwise MFD
+600.0                                   #initial rain (for runin)
+10.0                                    #initial temperature (for runin)
+20.0                                    #stone
+80.0                                    #fines
+2.0                                     #struct (currently unused)
+3.0                                     #permeaility (currently unused)
+1.0                                     #initial soil thickness (when not specified via raster)
+0.5                                     #initial soil moisture
+0.0                                     #intial soil organic content
+10.0                                    #initial soil nutrient status
+6.0                                     #critical discharge threshold
+1.0                                     #gelifluction slope threshold
+0.00001                                 #gelifluction kappa value
+600.0                                   #gelifluction flow limiter (to omit larger channel cells)
+0.00001                                 #conc erosion flow A parameter
+1.3                                     #conc erosion flow B parameter
+0.0004                                  #conc erosion max incision parameter
+0.0                                     # 
+0.0                                     # 
+0.9                                     #diffuse erosion travel distance
+0.4                                     #conc erosion travel distance
+0.9                                     #geifluction erosion travel distance
+6.0                                     #vegetation growth inflex point
+6.0                                     #vegetation growth sensitivity
