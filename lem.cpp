@@ -157,6 +157,5 @@ int main(int argc, char* argv[]) {
 	fflush(data.outlog);
 	fclose(data.outlog);
 
-	exit(0);
 
 }
