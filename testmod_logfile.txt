@@ -4,7 +4,7 @@ Bedrock file   =  soilT.tif
 logfile: testmod_logfile.txt
 Max_iterations:1. 
 Summary file data in testmod_budgets.csv 
-Memory on CUDA card free at start of iteration: 6814976 total: 8388608
+Memory on CUDA card free at start of iteration: 6829312 total: 8388608
 climate file read 
 ncols 1542 
 nrows 2032 
@@ -26,14 +26,14 @@ soilMoisture: 0.500000, nutrients: 10.000000, soilBio: 0.000000, TotalBio: 495.3
 Performing the simulation
 set device to zero :no error
 Allocated DEM and slope matrices on device :no error
-Memory on CUDA card free after device DEM and slope grids allocated: 6512576 total: 8388608 
+Memory on CUDA card free after device DEM and slope grids allocated: 6526912 total: 8388608 
 
 ***********************
-Starting mode testmod Iteration -100 of 1
+Starting mode testmod Iteration 1 of 1
 ***********************
 FD: setdevicespace0:no error
 FD: setdevicespace1:no error
-Memory on CUDA card free after FD space allocated: 6032896 total: 8388608 
+Memory on CUDA card free after FD space allocated: 6047232 total: 8388608 
 FD: setdevicespace2:no error
 FD: starting cuFlowDirection :no error
 FD: dev mem allocate shortest_path, fdmod, watershed_id :no error
@@ -48,14 +48,14 @@ FD: first shortest_path_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: route plateaus :no error
 FD: Routed plateaus in 1 iterations. Now starting flooding driver... 
-FD: time to complete flow routing routine algorithm 7.227141 s
-FD: Memory on CUDA card free at end of routing: 6032896 total: 8388608
+FD: time to complete flow routing routine algorithm 7.340721 s
+FD: Memory on CUDA card free at end of routing: 6047232 total: 8388608
 FD: error after FD clear :no error
-FD: Memory on CUDA card free after FD space freed: 6118848 total: 8388608 
+FD: Memory on CUDA card free after FD space freed: 6133184 total: 8388608 
 
 FA: setdevicespace_FA:no error
 FA: calcrunoffweight:no error
-FA: Max RunOff: 0.967325,  Min RunOff: 0.491862, Ave Runoff: 0.741703 
+FA: Max RunOff: 0.000000,  Min RunOff: 0.000000, Ave Runoff: 0.000000 
 FA: runoff weights calculated :no error
 FA: FA memory allocation :no error
 FA: okGrid copy back :no error
@@ -74,12 +74,12 @@ FA: Bad value count (i.e. not in catchment(s) = 0
 time to complete correctflowMFD algorithm -107374.176000 s
 
 FA: End of FA :invalid resource handle
-FA: Memory on CUDA card free after FA space freed: 5916416 total: 8388608 
+FA: Memory on CUDA card free after FA space freed: 5930752 total: 8388608 
 
 FA: cleardevicespace_FA:no error
 MOD: setdevicespace_Process :no error
 MOD: Matrix memcopy operations :no error
-MOD: Memory on CUDA card free after model matrix space allocated: 5609984 total: 8388608 
+MOD: Memory on CUDA card free after model matrix space allocated: 5624320 total: 8388608 
 MOD: Starting Model Process Routines 
 MOD: diff_erosion :no error
 MOD: conc_erosion :no error
@@ -91,14 +91,20 @@ MOD: weathering :no error
 MOD: fines/stone/soilT/soilM/weatherC and P memcopy back :no error
 MOD: update surface :no error
 MOD: update surface memcopy back :no error
-MOD: Min DEM ht : 467.384054 
+MOD: Min DEM ht : 467.384055 
 MOD: update_nutrient_content :no error
 MOD: conc_soilB/nutB copyback :no error
 MOD: grow vegetation :no error
 MOD: mem copyback TotBn :no error
-MOD: time to complete flow accumulation 0.134561 s
-MOD: Memory on CUDA card free at end of erosion: 5609984 total: 8388608
+MOD: time to complete flow accumulation 0.129152 s
+MOD: Memory on CUDA card free at end of erosion: 5624320 total: 8388608
 
-MOD: Memory on CUDA card free after model space freed: 6430656 total: 8388608 
+MOD: Memory on CUDA card free after model space freed: 6444992 total: 8388608 
 MOD: Clear matrix operations :invalid argument
 Ave erosion rate mm/a : 71199716422552174593454104681771404675828658359729389568.00000000 
+Memory on CUDA card free at end of iteration: 6444992 total: 8388608
+Finished Iteration 1
+Memory on CUDA card free after DEM and slope device grids space freed: 6494016 total: 8388608 
+Total simulation time of : 18.28500000000000014 
+
+All hosts matrices memory freed 
