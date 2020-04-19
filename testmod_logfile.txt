@@ -50,15 +50,15 @@ FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: route plateaus :no error
-FD: Routed plateaus in 41 iterations. Now starting flooding driver... 
-FD: time to complete flow routing routine algorithm 0.180642 s
+FD: Routed plateaus in 43 iterations. Now starting flooding driver... 
+FD: time to complete flow routing routine algorithm 0.180809 s
 FD: Memory on CUDA card free at end of routing: 6047232 total: 8388608
 FD: error after FD clear :no error
 FD: Memory on CUDA card free after FD space freed: 6133184 total: 8388608 
 
 FA: setdevicespace_FA:no error
 FA: calcrunoffweight:no error
-FA: Max RunOff: 0.000000,  Min RunOff: -9999.000000, Ave Runoff: -7035.667885 
+FA: Max RunOff: 0.488019,  Min RunOff: -9999.000000, Ave Runoff: -7035.523551 
 FA: runoff weights calculated :no error
 FA: FA memory allocation :no error
 FA: okGrid copy back :no error
@@ -99,7 +99,7 @@ MOD: update_nutrient_content :no error
 MOD: conc_soilB/nutB copyback :no error
 MOD: grow vegetation :no error
 MOD: mem copyback TotBn :no error
-MOD: time to complete flow accumulation 0.126088 s
+MOD: time to complete flow accumulation 0.127732 s
 MOD: Memory on CUDA card free at end of erosion: 5624320 total: 8388608
 
 MOD: Memory on CUDA card free after model space freed: 6444992 total: 8388608 
@@ -108,6 +108,6 @@ Ave erosion rate mm/a :  -nan(ind)
 Memory on CUDA card free at end of iteration: 6444992 total: 8388608
 Finished Iteration 1
 Memory on CUDA card free after DEM and slope device grids space freed: 6494016 total: 8388608 
-Total simulation time of : 18.64000000000000057 
+Total simulation time of : 18.24500000000000099 
 
 All hosts matrices memory freed 
