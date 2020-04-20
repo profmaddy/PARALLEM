@@ -91,7 +91,6 @@
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\FD_kernels\bypass.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\FD_kernels\newflow.cu" />
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\FD_kernels\routeflow.cu">
       <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include;%(Include)</Include>
     </CudaCompile>
@@ -102,6 +101,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="mfd_simple.cu" />
+    <CudaCompile Include="newflow.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\Data.cpp">

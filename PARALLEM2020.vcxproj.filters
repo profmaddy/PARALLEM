@@ -5,7 +5,6 @@
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\memory.cu" />
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\memory_dev.cu" />
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\FD_kernels\bypass.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\FD_kernels\newflow.cu" />
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\FD_kernels\routeflow.cu" />
     <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MOD_kernels\runoffweight.cu" />
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\erosion.cu" />
@@ -13,6 +12,7 @@
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\mfd_accum.cu" />
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\updates.cu" />
     <CudaCompile Include="mfd_simple.cu" />
+    <CudaCompile Include="newflow.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\Data.cpp" />
