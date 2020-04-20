@@ -216,14 +216,14 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
 
   //#DEBUG
   if (self >= ncell_x * ncell_y) { return;}
-  if (mask[self] != 1) { return; }
+  //if (mask[self] != 1) { return; }
 
   
   mfd[self] = 0; // set to nodataValue
   SFD[self] = 0; // set to nodataValue
 
  
-  __syncthreads();
+  //__syncthreads();
 
  
   smax = 0.0;// needed for SFD aspect
@@ -294,14 +294,15 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
 		  }
 	  }
 
-	  if (upslopecount >7) {  atomicAdd (sinkcounter,1);
+	  if (upslopecount >7) {  
+              atomicAdd(sinkcounter,1);
 	  	  	  aspect = 0;
 	  	  	  aspectsfd = 0;
 	  } // I got nowhere to go because I am a sink
 
 	  if ((flatcount + upslopecount) > 7)
 		{ if(upslopecount <=7){ // do not double count the sinks
-								atomicAdd (flatcounter,1);
+								atomicAdd(flatcounter,1);
 								aspect = 0;
 								aspectsfd = 0;
 							  }
@@ -314,6 +315,7 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
 
 	  mfd[self] = aspect;
   	  SFD[self] = aspectsfd;// set the SFD direction - this is used for all processes i.e. they are not MFD
+
 }
 
 // __global__ void flow_boundaryMFD( int *mask, double *zs, double *slopes, int *SFD, int *mfd, int ncell_x, int ncell_y);

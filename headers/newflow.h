@@ -11,6 +11,7 @@
 #include "cuda_runtime_api.h"
 #include "helper_cuda.h"
 
+
 #include <thrust/device_ptr.h>
 #include <thrust/functional.h>
 #include <thrust/reduce.h>
@@ -19,6 +20,8 @@
 #include <thrust/fill.h>
 #include <thrust/extrema.h>
 #include <thrust/execution_policy.h>
+
+
 #include "production.h"
 
 

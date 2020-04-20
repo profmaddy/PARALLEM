@@ -26,14 +26,14 @@ soilMoisture: 0.500000, nutrients: 10.000000, soilBio: 0.000000, TotalBio: 495.3
 Performing the simulation
 set device to zero :no error
 Allocated DEM and slope matrices on device :no error
-Memory on CUDA card free after device DEM and slope grids allocated: 6526912 total: 8388608 
+Memory on CUDA card free after device DEM and slope grids allocated: 6743488 total: 8388608 
 
 ***********************
 Starting mode testmod Iteration 1 of 1
 ***********************
 FD: setdevicespace0:no error
 FD: setdevicespace1:no error
-Memory on CUDA card free after FD space allocated: 6047232 total: 8388608 
+Memory on CUDA card free after FD space allocated: 6263808 total: 8388608 
 FD: setdevicespace2:no error
 FD: starting cuFlowDirection :no error
 FD: dev mem allocate shortest_path, fdmod, watershed_id :no error
@@ -41,7 +41,7 @@ FD: memcopy dx, dy, dem, slopeptr, Slopes and prop :no error
 FD: fd and SFD to GPU :no error
 FD: first flow routing :no error
 FD: initial sinks :0 
-FD: initial flats :9453 
+FD: initial flats :1798348 
 Edge Flat and Sink count in catchment: 9453 of 1337310 cells in catchment
 Negative FD in catchment: 0 
 FD: return from shortest_paths_plateaus :no error
@@ -51,14 +51,14 @@ FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: route plateaus :no error
 FD: Routed plateaus in 43 iterations. Now starting flooding driver... 
-FD: time to complete flow routing routine algorithm 0.180809 s
-FD: Memory on CUDA card free at end of routing: 6047232 total: 8388608
+FD: time to complete flow routing routine algorithm 1.967440 s
+FD: Memory on CUDA card free at end of routing: 6263808 total: 8388608
 FD: error after FD clear :no error
-FD: Memory on CUDA card free after FD space freed: 6133184 total: 8388608 
+FD: Memory on CUDA card free after FD space freed: 6349760 total: 8388608 
 
 FA: setdevicespace_FA:no error
 FA: calcrunoffweight:no error
-FA: Max RunOff: 0.488019,  Min RunOff: -9999.000000, Ave Runoff: -7035.523551 
+FA: Max RunOff: 0.488019,  Min RunOff: 0.000000, Ave Runoff: 0.485794 
 FA: runoff weights calculated :no error
 FA: FA memory allocation :no error
 FA: okGrid copy back :no error
@@ -83,31 +83,9 @@ FA: cleardevicespace_FA:no error
 MOD: setdevicespace_Process :no error
 MOD: Matrix memcopy operations :no error
 MOD: Memory on CUDA card free after model matrix space allocated: 5624320 total: 8388608 
-MOD: Starting Model Process Routines 
-MOD: diff_erosion :no error
-MOD: conc_erosion :no error
-MOD: gelifluction :no error
-MOD: returned from sedmfdaccum :no error
-MOD: ero/inc/dep/slope memcopy :no error
-MOD: surface_change :no error
-MOD: weathering :no error
-MOD: fines/stone/soilT/soilM/weatherC and P memcopy back :no error
-MOD: update surface :no error
-MOD: update surface memcopy back :no error
-MOD: Min DEM ht : -0.010000 
-MOD: update_nutrient_content :no error
-MOD: conc_soilB/nutB copyback :no error
-MOD: grow vegetation :no error
-MOD: mem copyback TotBn :no error
-MOD: time to complete flow accumulation 0.127732 s
-MOD: Memory on CUDA card free at end of erosion: 5624320 total: 8388608
-
 MOD: Memory on CUDA card free after model space freed: 6444992 total: 8388608 
 MOD: Clear matrix operations :invalid argument
-Ave erosion rate mm/a :  -nan(ind) 
-Memory on CUDA card free at end of iteration: 6444992 total: 8388608
-Finished Iteration 1
-Memory on CUDA card free after DEM and slope device grids space freed: 6494016 total: 8388608 
-Total simulation time of : 18.24500000000000099 
+Ave erosion rate mm/a : -142399432845104349186908209363542809351657316719458779136.00000000 
+Total simulation time of : 17.92299999999999827 
 
 All hosts matrices memory freed 

@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 	//readgdalBedrockfromFile(&data, &device);
 	createSoilTfromformula(&data);
 
-	//copyMask(&data, &device); // copy mask to device only needs to be done once
+	copyMask(&data, &device); // copy mask to device only needs to be done once
 
 	SetClimateMatrices(&data, -10000) ; // setup the climate gradients for ppt and temp
 	//copylastclimate(&data, &device);// this copies the last climate matrices and frees host memory

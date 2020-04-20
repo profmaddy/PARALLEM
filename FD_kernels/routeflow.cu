@@ -1,6 +1,7 @@
 #include "lem.h"
 #include "routeflow.h"
 #include "io.h"
+#include "newflow.h"
 
 double calcprops(Data* data) {
 
@@ -549,9 +550,6 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 void cuFlowDirection(Data* data, Data* device, int iter)
 
 {
-#ifndef PRODUCTION_RUN
-	printf("cuFlowDirection\n");
-#endif
 
   fprintf(data->outlog, "FD: starting cuFlowDirection :%s\n", cudaGetErrorString(cudaGetLastError()));
 
@@ -584,13 +582,6 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   dim3 dimGrid(ncell_x/block_ncell_x + 1, ncell_y/block_ncell_y + 1);
   dim3 dimBlock(block_ncell_x, block_ncell_y);
   fullsize= ncell_x * ncell_y;
-
-#ifndef PRODUCTION_RUN
-  printf("#########################\n");
-  printf("Max x value = %d\n", (ncell_x/block_ncell_x+1)*block_ncell_x);
-  printf("Max y value = %d\n", (ncell_y/block_ncell_y+1)*block_ncell_y);
-  printf("#########################\n");
-#endif
 
   // declare transient memory to be freed on exit
   data->shortest_paths = (float*) malloc(fullsize * sizeof(float));
@@ -635,6 +626,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 
 /*   for (int i= 0; i<2; i++)
    { */
+
 	   *sinkcounter_h = 0;
 	   *flatcounter_h = 0;
 	   checkCudaErrors( cudaMemcpy(sinkcounter_d, sinkcounter_h, sizeof(int), cudaMemcpyHostToDevice) );
@@ -645,6 +637,11 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 
 	   fprintf(data->outlog,"FD: first flow routing :%s\n", cudaGetErrorString(cudaGetLastError()));
        fflush(data->outlog);
+
+       checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
+       data->FDfile = "afterFlowDirs.txt";
+       write_int(data, data->fd, data->FDfile);
+
 	   checkCudaErrors( cudaMemcpy(sinkcounter_h, sinkcounter_d, sizeof(int) ,cudaMemcpyDeviceToHost) );
 	   checkCudaErrors( cudaMemcpy(flatcounter_h, flatcounter_d, sizeof(int) ,cudaMemcpyDeviceToHost) );
 	   printf("FD: initial sinks :%d \n", *sinkcounter_h);

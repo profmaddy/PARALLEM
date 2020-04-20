@@ -98,27 +98,27 @@ int computeRunOffWeights(Data* data, Data* device)
 	thrust::device_ptr<double> summary_d = thrust::device_pointer_cast(device->summary);
 
 	//predicate function is_not_zero defined in header
-	thrust::copy_if(runoff_d, runoff_d + fullsize, summary_d, is_not_zero());
+	thrust::copy_if(runoff_d, runoff_d + fullsize, summary_d, is_not_negative());
 
 	double maxRO;
 	double minRO;
 	double sumRO;
 	double aveRO;
 
+	data->activecells = 1337310;
+
 	maxRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 0, thrust::maximum<double>());
 	minRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 0, thrust::minimum<double>());
 	sumRO = thrust::reduce(summary_d, summary_d + data->activecells);
 	aveRO = sumRO / data->activecells;
 
-	fprintf(data->outlog, "FA: Max RunOff: %f,  Min RunOff: %f, Ave Runoff: %f \n", maxRO, minRO, aveRO);
+	fprintf(data->outlog, "FA: Max RunOff: %lf,  Min RunOff: %lf, Ave Runoff: %lf \n", maxRO, minRO, aveRO);
 	printf("FA: Max RunOff: %lf,  Min RunOff: %lf, Ave Runoff: %lf \n", maxRO, minRO, aveRO);
 
 	cudaMemcpy(data->runoffweight, device->runoffweight, sizeof(double)* ncell_x* ncell_y, cudaMemcpyDeviceToHost); // here just for checking
 	fprintf(data->outlog, "FA: runoff weights calculated :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	write_double(data, data->runoffweight, "row.txt");
-
-
 
 	thrust::fill(summary_d, summary_d + data->activecells, 0.0); // reset the summary grid
 
