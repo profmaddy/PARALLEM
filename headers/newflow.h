@@ -59,7 +59,7 @@ __global__ void flow_boundaryMFD( int *mask, double *zs, double *slopes, int *SF
 
 __global__ void shortest_paths_plateaus_initMFD(int *mask, double *zs, int *fd, int* SFD, float* shortest_paths, int cell_size, int ncell_x, int ncell_y, double *lowHeight);
 
-__global__ void route_plateausMFD(int *mask, double *zs, double*slopes, int *fd, int* SFD, float* shortest_paths,	int ncell_x, int ncell_y, int *dx, int *dy, int *change_flag, double *lowHeight);
+__global__ void route_plateausMFD(int *mask, double *zs, double*slopes, double*props, int *fd, int* SFD, float* shortest_paths,	int ncell_x, int ncell_y, int *dx, int *dy, int *change_flag, double *lowHeight);
 
 __global__ void init_watershedMFD(int *mask, int *SFD, int *watershed_id, double *zs, float *shortest_paths, int *dx, int *dy, int *counter, int ncell_x, int ncell_y);
 
