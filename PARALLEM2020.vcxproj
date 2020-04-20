@@ -84,50 +84,47 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\eroincidep.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\erosion.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\mfd_accum.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\updates.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\memory.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\memory_dev.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MOD_kernels\runoffweight.cu" />
     <CudaCompile Include="FA_kernels\mfd_simple.cu" />
     <CudaCompile Include="FD_kernels\newflow.cu" />
     <CudaCompile Include="FD_kernels\routeflow.cu" />
-    <CudaCompile Include="kernel.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </CudaCompile>
+    <CudaCompile Include="MEM_kernels\MapInfo.cu" />
+    <CudaCompile Include="MEM_kernels\memory.cu" />
+    <CudaCompile Include="MEM_kernels\memory_dev.cu" />
+    <CudaCompile Include="MOD_kernels\eroincidep.cu" />
+    <CudaCompile Include="MOD_kernels\erosion.cu" />
+    <CudaCompile Include="MOD_kernels\mfd_accum.cu" />
+    <CudaCompile Include="MOD_kernels\runoffweight.cu" />
+    <CudaCompile Include="MOD_kernels\updates.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\Data.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\darre\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\io.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\darre\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\ioGDAL.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="lem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\headers\eroincidep.h" />
-    <ClInclude Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\headers\erosion.h" />
-    <ClInclude Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\headers\updates.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\Data.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\io.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\ioGDAL.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\lem.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\memory.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\memory_dev.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\mfd_simple.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\newflow.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\routeflow.h" />
+    <ClCompile Include="MEM_kernels\Data.cpp" />
+    <ClCompile Include="MEM_kernels\io.cpp" />
+    <ClCompile Include="MEM_kernels\ioGDAL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="headers\config.h" />
+    <ClInclude Include="headers\Data.h" />
+    <ClInclude Include="headers\device_constants.cuh" />
+    <ClInclude Include="headers\Directions.h" />
+    <ClInclude Include="headers\eroincidep.h" />
+    <ClInclude Include="headers\erosion.h" />
+    <ClInclude Include="headers\flowDirection.h" />
+    <ClInclude Include="headers\io.h" />
+    <ClInclude Include="headers\lem.h" />
+    <ClInclude Include="headers\MapInfo.h" />
+    <ClInclude Include="headers\memory.h" />
+    <ClInclude Include="headers\memory_dev.h" />
+    <ClInclude Include="headers\mfd_accum.h" />
+    <ClInclude Include="headers\mfd_simple.h" />
+    <ClInclude Include="headers\newflow.h" />
+    <ClInclude Include="headers\production.h" />
+    <ClInclude Include="headers\routeflow.h" />
+    <ClInclude Include="headers\runoffweight.h" />
+    <ClInclude Include="headers\updates.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

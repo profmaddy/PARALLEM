@@ -1,39 +1,129 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\memory.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\memory_dev.cu" />
-    <CudaCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MOD_kernels\runoffweight.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\erosion.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\eroincidep.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\mfd_accum.cu" />
-    <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\updates.cu" />
-    <CudaCompile Include="FD_kernels\routeflow.cu" />
-    <CudaCompile Include="FD_kernels\newflow.cu" />
-    <CudaCompile Include="FA_kernels\mfd_simple.cu" />
+    <CudaCompile Include="FD_kernels\newflow.cu">
+      <Filter>FD</Filter>
+    </CudaCompile>
+    <CudaCompile Include="FD_kernels\routeflow.cu">
+      <Filter>FD</Filter>
+    </CudaCompile>
+    <CudaCompile Include="FA_kernels\mfd_simple.cu">
+      <Filter>FA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MEM_kernels\MapInfo.cu">
+      <Filter>MEM</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MEM_kernels\memory.cu">
+      <Filter>MEM</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MEM_kernels\memory_dev.cu">
+      <Filter>MEM</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\eroincidep.cu">
+      <Filter>MOD</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\erosion.cu">
+      <Filter>MOD</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\mfd_accum.cu">
+      <Filter>MOD</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\runoffweight.cu">
+      <Filter>MOD</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\updates.cu">
+      <Filter>MOD</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\Data.cpp" />
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\io.cpp" />
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\ioGDAL.cpp" />
     <ClCompile Include="lem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\Data.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\io.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\ioGDAL.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\lem.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\memory.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\memory_dev.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\newflow.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\routeflow.h" />
-    <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\mfd_simple.h" />
-    <ClInclude Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\headers\erosion.h" />
-    <ClInclude Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\headers\updates.h" />
-    <ClInclude Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\headers\eroincidep.h" />
+    <ClCompile Include="MEM_kernels\Data.cpp">
+      <Filter>MEM</Filter>
+    </ClCompile>
+    <ClCompile Include="MEM_kernels\io.cpp">
+      <Filter>MEM</Filter>
+    </ClCompile>
+    <ClCompile Include="MEM_kernels\ioGDAL.cpp">
+      <Filter>MEM</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="headers">
+      <UniqueIdentifier>{006d7ad5-9a69-40e8-b937-2a959c2981da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FD">
+      <UniqueIdentifier>{2d4649b0-6dd1-45e6-9879-35b6bb76f4d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FA">
+      <UniqueIdentifier>{da042b8c-a6f3-464f-85b6-79e747c89acb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MEM">
+      <UniqueIdentifier>{d0113ac0-015a-44d0-a69c-6287e4a30353}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MOD">
+      <UniqueIdentifier>{1887aee8-4eeb-4659-a54b-52b9cc391f9e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="headers\config.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\Data.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\device_constants.cuh">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\Directions.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\eroincidep.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\erosion.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\flowDirection.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\io.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\lem.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\MapInfo.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\memory.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\memory_dev.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\mfd_accum.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\mfd_simple.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\newflow.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\production.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\routeflow.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\runoffweight.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\updates.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
