@@ -15,10 +15,10 @@
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\updates.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\lem.cpp" />
     <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\Data.cpp" />
     <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\io.cpp" />
     <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\ioGDAL.cpp" />
+    <ClCompile Include="lem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers\Data.h" />
