@@ -9,9 +9,9 @@
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\eroincidep.cu" />
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\mfd_accum.cu" />
     <CudaCompile Include="..\..\..\OneDrive - Newcastle University\cuda-workspace2\PARALLEM_base\MOD_kernels\updates.cu" />
-    <CudaCompile Include="mfd_simple.cu" />
     <CudaCompile Include="FD_kernels\routeflow.cu" />
     <CudaCompile Include="FD_kernels\newflow.cu" />
+    <CudaCompile Include="FA_kernels\mfd_simple.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\MEM_kernels\Data.cpp" />
