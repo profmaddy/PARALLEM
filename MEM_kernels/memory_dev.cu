@@ -1,5 +1,18 @@
 
 #include "memory_dev.h"
+#include <cuda.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include <cuda_runtime_api.h>
+#include "helper_cuda.h"
+
+//#include "helper_timer.h"
+//#include "helper_functions.h"
+//#include "cuda_runtime_api.h"
+//#include "cuda_runtime.h"
+//#include <device_launch_parameters.h>
+
+
 
 void setslopesspace(Data* data, Data* device)
 {
@@ -13,7 +26,7 @@ void setslopesspace(Data* data, Data* device)
 
 
 	  cudaMemGetInfo(&freenow, &total);
-	  fprintf(data->outlog, "CUDA card free after Slopes space allocated: %d total: %d \n",freenow/1024,total/1024);
+	  fprintf(data->outlog, "CUDA card free after Slopes space allocated: %zd total: %zd \n",freenow/1024,total/1024);
 	  fprintf(data->outlog, "slopes space allocated:on host and device  %s\n", cudaGetErrorString(cudaGetLastError()));
 }
 
@@ -43,7 +56,7 @@ void setdevicespace_FD(Data* data, Data* device)
 	  fprintf(data->outlog, "FD: setdevicespace1:%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	  cudaMemGetInfo(&freenow, &total);
-	  fprintf(data->outlog, "Memory on CUDA card free after FD space allocated: %d total: %d \n",freenow/1024,total/1024);
+	  fprintf(data->outlog, "Memory on CUDA card free after FD space allocated: %zd total: %zd \n",freenow/1024,total/1024);
 	  fprintf(data->outlog, "FD: setdevicespace2:%s\n", cudaGetErrorString(cudaGetLastError()));
 
 }
@@ -67,7 +80,7 @@ void cleardevicespace_FD(Data* data, Data* device)
 		fprintf(data->outlog, "FD: error after FD clear :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 		cudaMemGetInfo(&freenow, &total);
-		fprintf(data->outlog, "FD: Memory on CUDA card free after FD space freed: %d total: %d \n\n",freenow/1024,total/1024);
+		fprintf(data->outlog, "FD: Memory on CUDA card free after FD space freed: %zd total: %zd \n\n",freenow/1024,total/1024);
 
 }
 
@@ -125,7 +138,7 @@ void cleardevicespace_FA(Data* data, Data* device)
 	//cudaFree(device->contribA); // free it here as it is no longer needed)
 
 	cudaMemGetInfo(&freenow, &total);
-	fprintf(data->outlog, "FA: Memory on CUDA card free after FA space freed: %d total: %d \n\n",freenow/1024,total/1024);
+	fprintf(data->outlog, "FA: Memory on CUDA card free after FA space freed: %zd total: %zd \n\n",freenow/1024,total/1024);
 
 	fprintf(data->outlog, "FA: cleardevicespace_FA:%s\n", cudaGetErrorString(cudaGetLastError()));
 }
@@ -185,7 +198,7 @@ void setdevicespace_Process(Data* data, Data* device)
 		fprintf(data->outlog, "MOD: Matrix memcopy operations :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 		cudaMemGetInfo(&freenow, &total);
-		fprintf(data->outlog, "MOD: Memory on CUDA card free after model matrix space allocated: %d total: %d \n",freenow/1024,total/1024);
+		fprintf(data->outlog, "MOD: Memory on CUDA card free after model matrix space allocated: %zd total: %zd \n",freenow/1024,total/1024);
 }
 
 void cleardevicespace_Process(Data* data, Data* device)
@@ -222,12 +235,13 @@ void cleardevicespace_Process(Data* data, Data* device)
 	cudaFree(device->soilMPtr);
 
 	cudaMemGetInfo(&freenow, &total);
-	fprintf(data->outlog, "MOD: Memory on CUDA card free after model space freed: %d total: %d \n",freenow/1024,total/1024);
+	fprintf(data->outlog, "MOD: Memory on CUDA card free after model space freed: %zd total: %zd \n",freenow/1024,total/1024);
 	fprintf(data->outlog, "MOD: Clear matrix operations :%s\n", cudaGetErrorString(cudaGetLastError()));
 }
 
 int copyMask(Data* data, Data* device)
 {
+
 
 	 int fullsize;
 	 int ncell_x = data->mapInfo.width;
@@ -240,7 +254,7 @@ int copyMask(Data* data, Data* device)
 	 fprintf(data->outlog, "Mask data sent to device %s\n", cudaGetErrorString(cudaGetLastError()));
 
 	thrust::device_ptr<int> activecells = thrust::device_pointer_cast(device->mask);
-	data->activecells  = thrust::count(activecells, activecells + fullsize, 1);
+	//data->activecells  = thrust::count(activecells, activecells + fullsize, 1);
 
 #ifndef PRODUCTION_RUN
 	printf("No of active cells = %d \n", data->activecells);
@@ -297,7 +311,7 @@ void createDeviceSpace(Data* data, Data* device)
 	fprintf(data->outlog,"Allocated DEM and slope matrices on device :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	cudaMemGetInfo(&freenow, &total);
-	fprintf(data->outlog,"Memory on CUDA card free after device DEM and slope grids allocated: %d total: %d \n",freenow/1024,total/1024);
+	fprintf(data->outlog,"Memory on CUDA card free after device DEM and slope grids allocated: %zd total: %zd \n",freenow/1024,total/1024);
 
 #ifndef PRODUCTION_RUN
 	printf("Device space created \n");
@@ -321,7 +335,7 @@ int clearDeviceSpace(Data* data, Data* device)
 	printf("Memory on CUDA card free after DEM and slope device grids space freed: %d total: %d \n",freenow/1024,total/1024);
 #endif
 
-	fprintf(data->outlog,"Memory on CUDA card free after DEM and slope device grids space freed: %d total: %d \n",freenow/1024,total/1024);
+	fprintf(data->outlog,"Memory on CUDA card free after DEM and slope device grids space freed: %zd total: %zd \n",freenow/1024,total/1024);
 
 
 	free(data->watershed_id);

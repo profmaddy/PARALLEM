@@ -43,9 +43,6 @@
     <ClCompile Include="MEM_kernels\io.cpp">
       <Filter>MEM</Filter>
     </ClCompile>
-    <ClCompile Include="MEM_kernels\ioGDAL.cpp">
-      <Filter>MEM</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -107,9 +104,6 @@
     <ClInclude Include="headers\mfd_accum.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="headers\mfd_simple.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="headers\newflow.h">
       <Filter>headers</Filter>
     </ClInclude>
@@ -123,6 +117,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="headers\updates.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\mfd_simple.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

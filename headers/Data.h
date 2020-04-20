@@ -3,9 +3,9 @@
 #define DATA
 
 #include "lem.h"
-//#include "MapInfo.h"
+#include "MapInfo.h"
 //#include "production.h"
-//#include "memory.h"
+// #include "memory.h"
 
 
 /*! This is the main data structure used to pass values across the sub-models */
@@ -206,29 +206,29 @@ int setClimate(Data* data, int iterations);
 
 int zerogrids(Data* data);
 
-int readgdalDEMfromFile(Data* data);
+//int readgdalDEMfromFile(Data* data);
 
-int readBurnFDfromFile(Data* data);
+//int readBurnFDfromFile(Data* data);
 
 int init_setoutletcell(Data* data);
 
-int readgdalBedrockfromFile(Data* data, Data* device);
+//int readgdalBedrockfromFile(Data* data, Data* device);
 
 void createSoilTfromformula(Data* data);
 
 int createmask(Data* data);
 
-int readgdalmaskfromFile(Data* data) ;
+//int readgdalmaskfromFile(Data* data) ;
 
-void savegrids(Data* data, Catchment* catchments,  int iteration);
+//void savegrids(Data* data, Catchment* catchments,  int iteration);
 
 void budget_calc(Data* data);
 
 void copyprevht(Data* data);
 
-int writegdalGRIDtoFile(Data* data, Catchment* catchments, char* fileName, int whichtype, int what) ;
+//int writegdalGRIDtoFile(Data* data, Catchment* catchments, char* fileName, int whichtype, int what) ;
 
-int writeGRIDtoFile(Data* data, char* fileName, int whichtype, int what);
+//int writeGRIDtoFile(Data* data, char* fileName, int whichtype, int what);
 
 int writeSummaryDataToFile(Data* data, int iteration);
 

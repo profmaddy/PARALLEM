@@ -1,7 +1,13 @@
 
 //#include "lem.h" // this contains headers for all standard and add-in libraries
-#include "headers/lem.h"
-#include"headers/erosion.h"
+#include "lem.h"
+#include "Data.h"
+#include "io.h"
+#include "memory.h"
+#include "memory_dev.h"
+#include "routeflow.h"
+#include "mfd_simple.h"
+#include "runoffweight.h"
 
 int main(int argc, char* argv[]) {
 
@@ -48,7 +54,7 @@ int main(int argc, char* argv[]) {
 	//readgdalBedrockfromFile(&data, &device);
 	createSoilTfromformula(&data);
 
-	copyMask(&data, &device); // copy mask to device only needs to be done once
+	//copyMask(&data, &device); // copy mask to device only needs to be done once
 
 	SetClimateMatrices(&data, -10000) ; // setup the climate gradients for ppt and temp
 	//copylastclimate(&data, &device);// this copies the last climate matrices and frees host memory
@@ -60,7 +66,8 @@ int main(int argc, char* argv[]) {
 		///retriveProcessMatrices(&data)	; uses GDAL
 	} // call will also reset runiniter tp 0
 
-	// Perform the iterations
+	
+	/// Perform the iterations
     printf("Performing the simulation\n");
     fprintf(data.outlog, "Performing the simulation\n");
 
@@ -73,9 +80,12 @@ int main(int argc, char* argv[]) {
     /************* START OF MAIN LOOP *********************/
 	//for (int i = start_pos_sim; i < last_pos_sim; i++) {
 
+
+	
 	createDeviceSpace(&data, &device);
 	modelruntype = 0;
-
+	
+	
    // for (int i = -100; i < 0; i++) {
 	int i = 1;
 	printf("Iteration %d of %d :\n", i, last_pos_sim);
@@ -122,12 +132,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	    setdevicespace_Process(&data, &device);
-	     erosionGPU(&data, &device, i);
+	     //erosionGPU(&data, &device, i);
 	    cleardevicespace_Process(&data, &device);
 
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration
 		zerogrids(&data);
-
+/*
 	//if (modelruntype ==0){copytolastclimate(&data, &device);} //copy climate matrices to lastclimte before erasing
 
 		cudaMemGetInfo(&freenow, &total);
@@ -140,10 +150,10 @@ int main(int argc, char* argv[]) {
 
 	clearDeviceSpace(&data, &device);
 	free(data.dem);
-
+	
 	char * burnfile = "burn.tif";
  	//writeGRIDtoFile(&data, burnfile, 0,0 );
-
+	*/
 	endrun = clock();
 	Ptime = (double) (endrun-startrun)/ CLOCKS_PER_SEC ;
 	fprintf(data.outlog, "Total simulation time of : %20.17lf \n\n", Ptime);

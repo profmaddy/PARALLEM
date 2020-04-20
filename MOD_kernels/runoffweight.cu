@@ -1,5 +1,6 @@
 
 #include "runoffweight.h"
+#include "io.h"
 /*!
 
   Calculates the actual runoff from individual cell in m.
@@ -74,8 +75,8 @@ __global__ void calcrunoffweight(int ncell_x, int ncell_y, double* ppn, int* mas
 
 int computeRunOffWeights(Data* data, Data* device)
 {
-	double currentRain;
-	double ppn;
+	//double currentRain;
+	//double ppn;
 
 	data->cellarea = data->mapInfo.cellsize * data->mapInfo.cellsize ;
 

@@ -1,7 +1,25 @@
 #include "eroincidep.h"
 #include "updates.h"
+#include "Directions.h"
 
+#include "lem.h"
+#include "data.h"
 
+struct is_not_zero
+{
+	__host__ __device__ bool operator() (double x)
+	{
+		return (x != 0.0);
+	}
+};
+
+struct is_not_negative
+{
+	__host__ __device__ bool operator() (double x)
+	{
+		return (x >= 0.0);
+	}
+};
 __global__ void Update_Surface (int *mask, double base_level, double *weatherC_d, double *weatherP_d, double* zs_d, double* dz_d, double cell_size, int rows, int cols)
 {
 

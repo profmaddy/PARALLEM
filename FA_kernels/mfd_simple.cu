@@ -1,5 +1,8 @@
 #include "lem.h"
 #include "Data.h"
+#include "io.h"
+#include "Directions.h"
+#include "mfd_simple.h"
 
 
 __device__ int nghbrindex(int client, int nghbr, int gridCols)

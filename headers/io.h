@@ -8,7 +8,8 @@
 #ifndef IO_H_
 #define IO_H_
 
-#include "lem.h"
+//#include "lem.h"
+#include "Data.h"
 
 struct header
 {

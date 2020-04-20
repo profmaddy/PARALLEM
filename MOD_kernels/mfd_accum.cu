@@ -1,8 +1,8 @@
 #include "mfd_accum.h"
-#include "Directions.h"
-#include "Data.h"
-#include "config.h"
-#include "lem.h"
+//#include "Directions.h"
+//#include "Data.h"
+//#include "config.h"
+//#include "lem.h"
 
 __device__ int inghbr(int client, int nghbr, int gridCols)
 {

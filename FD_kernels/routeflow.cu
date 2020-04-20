@@ -1,12 +1,6 @@
 #include "lem.h"
-
-//#include "routeflow.h"
-//#include "newflow.h"
-//#include "production.h"
-
-//#include "lem.h"
+#include "routeflow.h"
 #include "io.h"
-
 
 double calcprops(Data* data) {
 
@@ -68,7 +62,7 @@ double calcprops(Data* data) {
 double testoutletislowest(Data* data) {
  double lowest ;
   lowest = 1000.;
-  int cell;
+  //int cell;
   int width = data->mapInfo.width;
   int height = data->mapInfo.height ;
   int fullsize = width * height;
@@ -277,7 +271,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
   int *table_counter_d;
 
   fprintf(data->outlog, "FD: table size %d, list size %d", table_size, list_size);
-  fprintf(data->outlog, "FD: Creating hash table on GPU of size %d (= %f Mb)\n", table_size * list_size *3 * sizeof(HASH_TYPE), (table_size * list_size * sizeof(HASH_TYPE) * 3.0 / 1024 / 1024));
+  fprintf(data->outlog, "FD: Creating hash table on GPU of size %zd (= %f Mb)\n", table_size * list_size *3 * sizeof(HASH_TYPE), (table_size * list_size * sizeof(HASH_TYPE) * 3.0 / 1024 / 1024));
   //printf("HASH_TYPE = %lu   double = %lu\n", sizeof(HASH_TYPE), sizeof(double));
 
   hash_table = (HASH_TYPE*) calloc(table_size*list_size*3, sizeof(HASH_TYPE)); //cleared
@@ -853,5 +847,5 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   fprintf(data->outlog,"FD: time to complete flow routing routine algorithm %.6f s\n", time / 1000.0);
 
   cudaMemGetInfo(&freenow, &total);
-  fprintf(data->outlog,"FD: Memory on CUDA card free at end of routing: %d total: %d\n",freenow/1024,total/1024);
+  fprintf(data->outlog,"FD: Memory on CUDA card free at end of routing: %zd total: %zd\n",freenow/1024,total/1024);
 }

@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <SourcePath>C:\Users\darre\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base;C:\Users\darre\source\repos\PARALLEM2020;$(SourcePath)</SourcePath>
-    <IncludePath>C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;C:\Users\darre\OneDrive\Desktop\cuda-workspace 060420\PARALLEM_base\headers;$(IncludePath)</IncludePath>
+    <SourcePath>C:\Users\darre\source\repos\PARALLEM2020\FA_kernels;C:\Users\darre\source\repos\PARALLEM2020\FD_kernels;C:\Users\darre\source\repos\PARALLEM2020\MEM_kernels;C:\Users\darre\source\repos\PARALLEM2020\MOD_kernels;C:\Users\darre\source\repos\PARALLEM2020\headers;C:\Users\darre\source\repos\PARALLEM2020;$(SourcePath)</SourcePath>
+    <IncludePath>C:\Users\darre\source\repos\PARALLEM2020\headers;C:\ProgramData\NVIDIA Corporation\CUDA Samples\v10.2\common\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -84,23 +84,42 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="FA_kernels\mfd_simple.cu" />
-    <CudaCompile Include="FD_kernels\newflow.cu" />
-    <CudaCompile Include="FD_kernels\routeflow.cu" />
+    <CudaCompile Include="FA_kernels\mfd_simple.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="FD_kernels\newflow.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="FD_kernels\routeflow.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
     <CudaCompile Include="MEM_kernels\MapInfo.cu" />
     <CudaCompile Include="MEM_kernels\memory.cu" />
-    <CudaCompile Include="MEM_kernels\memory_dev.cu" />
-    <CudaCompile Include="MOD_kernels\eroincidep.cu" />
-    <CudaCompile Include="MOD_kernels\erosion.cu" />
-    <CudaCompile Include="MOD_kernels\mfd_accum.cu" />
-    <CudaCompile Include="MOD_kernels\runoffweight.cu" />
-    <CudaCompile Include="MOD_kernels\updates.cu" />
+    <CudaCompile Include="MEM_kernels\memory_dev.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\eroincidep.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\erosion.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\mfd_accum.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\runoffweight.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="MOD_kernels\updates.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lem.cpp" />
-    <ClCompile Include="MEM_kernels\Data.cpp" />
+    <ClCompile Include="MEM_kernels\Data.cpp">
+      <AdditionalUsingDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\darre\source\repos\PARALLEM2020\headers;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+    </ClCompile>
     <ClCompile Include="MEM_kernels\io.cpp" />
-    <ClCompile Include="MEM_kernels\ioGDAL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

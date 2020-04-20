@@ -8,7 +8,8 @@
 #ifndef MEMORY_
 #define MEMORY_
 
-#include "lem.h"
+//#include "lem.h"
+#include "Data.h"
 
 #include "cuda.h"
 #include "cuda_runtime.h"

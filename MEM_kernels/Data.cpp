@@ -1,7 +1,13 @@
 
-#include "headers/lem.h"
-//#include "Data.h"
+#include "Data.h"
 #include <sys/types.h>
+
+#include <cuda.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include <cuda_runtime_api.h>
+#include "helper_cuda.h"
+
 //#include <dirent.h>
 //#include <libgen.h>
 
@@ -97,7 +103,7 @@ int setProcessMatrices(Data* data)
   int fullsize;
   int x; int y;
 
-  double calinitBio;
+  //double calinitBio;
   double tempeffect;
   
   fullsize =  data->mapInfo.width * data->mapInfo.height;

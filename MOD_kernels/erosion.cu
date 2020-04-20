@@ -1,5 +1,5 @@
 
-#include "lem.h"
+//#include "lem.h"
 #include "erosion.h"
 #include <math.h>
 #include "device_constants.cuh"
@@ -97,7 +97,7 @@ void erosionGPU(Data* data, Data* device, int iter)
 	fprintf(data->outlog, "MOD: time to complete flow accumulation %.6f s\n", time / 1000.0);
 
 	cudaMemGetInfo(&freenow, &total);
-	fprintf(data->outlog, "MOD: Memory on CUDA card free at end of erosion: %d total: %d\n\n",freenow/1024,total/1024);
+	fprintf(data->outlog, "MOD: Memory on CUDA card free at end of erosion: %zd total: %zd\n\n",freenow/1024,total/1024);
 
 }
 
