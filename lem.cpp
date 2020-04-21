@@ -41,16 +41,14 @@ int main(int argc, char* argv[]) {
 
 	ReadClimateDataFromFile(&data); // read in appropriate number of data pairs, temp and rain and allocate sufficient memory
 
-	//std::cin.get(); // used to pause the output window
-
 	readgrid(&data); // will read the ascii file it replaced ..
-	//readgdalDEMfromFile(&data);  // the host malloc for dem is in here
 	//data.demfile = "testascii.txt";
 	//write_double(&data, data.dem, data.demfile);
 
 	createmask(&data);
 
 	init_setoutletcell(&data);// set oulet cell for entire simulation i.e. nothing can be lower.
+
 	//readgdalBedrockfromFile(&data, &device);
 	createSoilTfromformula(&data);
 
@@ -66,7 +64,6 @@ int main(int argc, char* argv[]) {
 		///retriveProcessMatrices(&data)	; uses GDAL
 	} // call will also reset runiniter tp 0
 
-	
 	/// Perform the iterations
     printf("Performing the simulation\n");
     fprintf(data.outlog, "Performing the simulation\n");
@@ -79,13 +76,10 @@ int main(int argc, char* argv[]) {
 
     /************* START OF MAIN LOOP *********************/
 	//for (int i = start_pos_sim; i < last_pos_sim; i++) {
-
-
-	
+		
 	createDeviceSpace(&data, &device);
 	modelruntype = 0;
-	
-	
+		
    // for (int i = -100; i < 0; i++) {
 	int i = 1;
 	printf("Iteration %d of %d :\n", i, last_pos_sim);
@@ -97,39 +91,23 @@ int main(int argc, char* argv[]) {
 		if (i >= 0 ){
 			SetClimateMatrices(&data,i);
 		}
-
-	if (modelruntype == 0){
+	
 		setdevicespace_FD(&data, &device);
-			// DirFlow (&data); // tis is the basic sequential version
-			cuFlowDirection(&data, &device, i);
+		cuFlowDirection(&data, &device, i); // calculate flow direction (MFD)
 		cleardevicespace_FD(&data, &device);
-	}
 
 	data.FDfile = "fd.txt";
 	write_int(&data, data.fd, data.FDfile);
 
-	//writeGRIDtoFile(&data, "fd.tif", 1, 0);
-		///writeGRIDtoFile(&data, "sp.tif", 0, 18); needs an float32 version
-
-
 		setdevicespace_FA(&data, &device);  // load matrices for runoffweight calculation
-		computeRunOffWeights(&data, &device);
-		
-		if (modelruntype == 0)
-					{
-					correctmfdflow(&data, &device, i);
-					}
-
+		computeRunOffWeights(&data, &device); // calculate runoff
+		calcwater(&data);
+		calcprops(&data); 
+		correctmfdflow(&data, &device, i); // calculate flow accumulation (MFD)
 		cleardevicespace_FA(&data, &device);
 
-		data.FAfile = "fa.txt";
-		write_double(&data, data.fa, data.FAfile);
-		//writeGRIDtoFile(&data, "fa.tif", 0, 1);
-		
-
-	if (modelruntype != 0){
-		//bypassrouting(&data, &device, i);
-	}
+	data.FAfile = "fa.txt";
+	write_double(&data, data.fa, data.FAfile);
 
 	    setdevicespace_Process(&data, &device);
 	     //erosionGPU(&data, &device, i);

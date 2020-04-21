@@ -198,6 +198,7 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
   int upslopecount;
   int flatcount;
   int flatneighbour;
+  int slopeidx;
 
   double smax, stemp, slopetot;
   float dc;
@@ -208,24 +209,19 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
     return;
 
   int self = irow * ncell_x + icol;
+  slopeidx = 8 * self;
 
   // force all aspects to 8 i.e. no direction
   mfd[self] = -9999; // set to nodataValue
   SFD[self] = -9999; // set to nodataValue
 
-
-  //#DEBUG
   if (self >= ncell_x * ncell_y) { return;}
-  //if (mask[self] != 1) { return; }
+  if (mask[self] != 1) { return; } // return no data value to cells outside grid
 
   
-  mfd[self] = 0; // set to nodataValue
-  SFD[self] = 0; // set to nodataValue
-
- 
-  //__syncthreads();
-
- 
+  mfd[self] = 0; // set to zero default
+  SFD[self] = 0; // set to zero default
+     
   smax = 0.0;// needed for SFD aspect
   slopetot = 0.0; // for down slope directions and mfd only
   aspect = 0; // we will now code using MFD aspect coding -default aspect is none i.e. zero, this will signify sink or flat for routing
@@ -240,7 +236,7 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
 		celly = irow + dy [dcell];
 		if (cellx >= 0 && cellx < ncell_x && celly >= 0 && celly < ncell_y) // for each of my neighbours
 		{
-			//newaspect = 2^((dcell + 6) % 8);
+			//newaspect = 2^((dcell + 6) % 8); // this does not work on the GPU
 			  if (dcell == 0)  newaspect = 64;
 			  if (dcell == 1)  newaspect = 128;
 			  if (dcell == 2)  newaspect = 1;
@@ -270,8 +266,8 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
 		  //store the slope and aspect value if it flows here i.e. down hill
 		  if ( (thiscellht > targetcellht) && (targetcellht != -9999) )
 		  {
-			  slopes[self+dcell] = stemp;
-			  slopetot += slopes[self+dcell];
+			  slopes[slopeidx+dcell] = stemp;
+			  slopetot += slopes[slopeidx+dcell];
 				  if (stemp > smax) // default aspect set to aspect of max slope for SFD
 				  {
 					  smax = stemp;
@@ -330,6 +326,8 @@ __global__ void flow_boundaryMFD( int *mask, double *dem, double *slopes, int *S
 
     int self ;
     self = irow * ncell_x + icol;
+    int slopeidx;
+    slopeidx = 0;
 
     // if (mask[self] == 0) return; // go back if not in grid
      if (mfd[self] != 0) return ;  // only looking at non defined edge cells
@@ -359,14 +357,15 @@ __global__ void flow_boundaryMFD( int *mask, double *dem, double *slopes, int *S
         // SW  S SE     8   4   2
 
        SFD[self] = 0; mfd[self] = 0;
-       if (dem[east] == -9999.) { SFD[self] = 1;mfd[self] = 1; }; // I can go east and don't include me in future calculations
-       if (dem[southeast] == -9999.) { SFD[self] = 2;mfd[self] = 2; }; // I can go southeast
-       if (dem[south] == -9999.) { SFD[self] = 4;mfd[self] = 4; }; // I can go south
-       if (dem[southwest] == -9999.) { SFD[self] = 8;mfd[self] = 8; }; // go southwest
-       if (dem[west] ==-9999.) { SFD[self] = 16;mfd[self] = 16; }; // go west
-       if (dem[northwest] ==-9999.) { SFD[self] = 32;mfd[self] = 32; }; // go northwest
-       if (dem[north] == -9999.)  { SFD[self] = 64;mfd[self] = 64; } ; // gp north
-       if (dem[northeast] == -9999.) { SFD[self] = 128;mfd[self] = 128; }; // go northeast
+       slopeidx = self * 8;
+       if (dem[east] == -9999.) { SFD[self] = 1; mfd[self] = 1; slopes[slopeidx + 2] = 0.0001 ; }; // I can go east and don't include me in future calculations
+       if (dem[southeast] == -9999.) { SFD[self] = 2;mfd[self] = 2; slopes[slopeidx + 3] = 0.0001; }; // I can go southeast
+       if (dem[south] == -9999.) { SFD[self] = 4;mfd[self] = 4; slopes[slopeidx + 4] = 0.0001; }; // I can go south
+       if (dem[southwest] == -9999.) { SFD[self] = 8;mfd[self] = 8; slopes[slopeidx + 5] = 0.0001; }; // go southwest
+       if (dem[west] ==-9999.) { SFD[self] = 16;mfd[self] = 16; slopes[slopeidx + 6] = 0.0001; }; // go west
+       if (dem[northwest] ==-9999.) { SFD[self] = 32;mfd[self] = 32; slopes[slopeidx + 7] = 0.0001; }; // go northwest
+       if (dem[north] == -9999.)  { SFD[self] = 64;mfd[self] = 64; slopes[slopeidx + 0] = 0.0001; }; ; // gp north
+       if (dem[northeast] == -9999.) { SFD[self] = 128;mfd[self] = 128; slopes[slopeidx + 1] = 0.0001;  }; // go northeast
 }
 
 //***************************************************
@@ -408,6 +407,7 @@ __global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double 
 	int irow, icol, dcell, cellx, celly;
 	int newaspect;
 	float dc, dis;
+    int index;
 
 	irow = blockIdx.y * blockDim.y + threadIdx.y;
 	icol = blockIdx.x * blockDim.x + threadIdx.x;
@@ -477,7 +477,8 @@ __global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double 
 				*change_flag = 1;  // don't care how many cells have changed - just that cells have changed
 				fd[self] = newaspect;
 				SFD[self] = newaspect;
-                //slopes[self + dcell] = 0.0001;
+                index = (self * 8) + dcell;
+                slopes[index] = 0.0001;
                 //props[self + dcell] = 1;
 				shortest_paths[self] = min_distance;
 				lowHeight[self] = lowHeight[celly * ncell_x + cellx];

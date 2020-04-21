@@ -2,7 +2,7 @@
 #include "Data.h"
 #include "config.h"
 #include "Directions.h"
-//#include "io.h"
+
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
@@ -25,5 +25,7 @@
 #define RUNOFFWEIGHT
 
 int computeRunOffWeights(Data* data, Data* device);
+void calcprops(Data* data);
+void calcwater(Data* data);
 
 #endif

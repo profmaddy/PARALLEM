@@ -108,7 +108,7 @@ int computeRunOffWeights(Data* data, Data* device)
 	data->activecells = 1337310;
 
 	maxRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 0, thrust::maximum<double>());
-	minRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 0, thrust::minimum<double>());
+	minRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 10, thrust::minimum<double>());
 	sumRO = thrust::reduce(summary_d, summary_d + data->activecells);
 	aveRO = sumRO / data->activecells;
 
@@ -118,11 +118,107 @@ int computeRunOffWeights(Data* data, Data* device)
 	cudaMemcpy(data->runoffweight, device->runoffweight, sizeof(double)* ncell_x* ncell_y, cudaMemcpyDeviceToHost); // here just for checking
 	fprintf(data->outlog, "FA: runoff weights calculated :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-	write_double(data, data->runoffweight, "row.txt");
+	fflush(data->outlog);
+
+	//write_double(data, data->runoffweight, "row.txt");
 
 	thrust::fill(summary_d, summary_d + data->activecells, 0.0); // reset the summary grid
 
-	fflush(data->outlog);
-
 	return 1;
 }
+
+void calcprops(Data* data) {
+
+	double slopetot;
+	int width = data->mapInfo.width;
+	int height = data->mapInfo.height;
+	int fullsize = width * height;
+	double propsum;
+	int counter;
+	int bigcounter;
+	int zeroslope;
+	counter = 0;
+	bigcounter = 0;
+	zeroslope = 0;
+	double propdiff;
+	int count;
+	int slopeidx;
+
+	slopeidx = 0;
+	count = 0;
+
+	for (int i = 0; i < fullsize; i++)
+	{
+		slopetot = 0;
+		propsum = 0;
+		propdiff = 0;
+		
+		if (data->mask[i] == 1) {
+
+			slopeidx = i * 8;
+			count++;
+			//if (count < 30) printf("fd: %d \n", data->fd[i]);
+			//if (count < 30) printf("slopes [0][1][2][3][4][5][6][7] :");
+			for (int k = 0; k < 8; k++)
+			{
+				slopetot += data->Slopes[slopeidx + k];
+				//if (count < 30) printf("[%lf]", data->Slopes[slopeidx + k]);
+				
+			}
+			//if (count < 30) printf("total = %lf\n", slopetot);
+			
+			if (slopetot == 0) {
+				zeroslope++;  // this is counting the flats with no slope?
+				//printf("zeroslope at %d with fd[%d]\n", i, data->fd);
+			}
+
+			//if (count <30) printf("props @ %d [0][1][2][3][4][5][6][7] :", i);
+			for (int k = 0; k < 8; k++)
+			{
+				data->prop[slopeidx + k] = data->Slopes[slopeidx + k] / slopetot;
+				propsum += data->prop[slopeidx + k];
+				//if (count < 30 || slopetot == 0)printf("fd[%d]\n[%lf]", data->fd[i], data->prop[slopeidx + k]);
+			}
+			//if (count < 30 || slopetot == 0) printf("total prop %lf\n", propsum);
+
+			if ((propsum > 1.0) || (propsum < 0.0)) {
+				propdiff = 1.0 - propsum;
+			}
+
+			if (propdiff != 0.0)
+			{
+				// printf("illegal propsum for cell %d diff is [%15.12f] \n", i, propdiff);
+				counter++;
+				if (propdiff > 0.01) bigcounter++;
+			}
+		}
+	}
+
+	printf("zero slope totals  %d \n", zeroslope);
+	printf("total number of non zero diff proportion entries = %d \n", counter);
+	printf("total number where propdiff > 0.01  = %d \n", bigcounter);
+
+}
+
+void calcwater(Data* data)
+{
+	double sumwater;
+	sumwater = 0;
+	int fullsize;
+	fullsize = data->mapInfo.height * data->mapInfo.width;
+	double sum;
+	sum = 0;
+	
+	for (int i = 0; i < fullsize; i++)
+	{
+		if (data->mask[i] == 1)
+		{
+			sum = data->runoffweight[i];
+			sumwater += sum;
+		}
+	}
+
+	printf("Total amount of water in grid for runoff = %lf \n", sumwater);
+
+}
+

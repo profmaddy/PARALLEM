@@ -35,6 +35,7 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     int self;
     int proploc;
     double accum;
+    double addhere;
 	unsigned int theval = 99999999;
     int   nie, nise, nis, nisw, niw, ninw, nin, nine;
     int cnfd;
@@ -67,7 +68,7 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     nin  = nghbrindex(self, NORTH,     gridCols);
     nine = nghbrindex(self, NORTHEAST, gridCols);
 
-    accum = 1; // weights[self];
+    accum = weights[self];
     
 	  // ORIGINAL CODE directions
 	  // NW  N NE    7  0  1
@@ -95,7 +96,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[nie]) return;
         proploc = (nie * 8) + 6;// flowing west
-        accum += fa[nie] * props[proploc]; 
+        addhere = fa[nie] * props[proploc];
+        accum += addhere; 
     }
     
     cnfd = fd[nise];
@@ -103,7 +105,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[nise]) return;
         proploc = (nise * 8) + 7;// flowing northwest
-        accum += fa[nise] * props[proploc];
+        addhere = fa[nise] * props[proploc];
+        accum += addhere;
     }
     
     cnfd = fd[nis];
@@ -111,7 +114,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[nis]) return;
         proploc = (nis * 8) + 7;//flowing north
-        accum += fa[nis] * props[proploc];
+        addhere = fa[nis] * props[proploc];
+        accum += addhere;
     }
     
     cnfd = fd[nisw];
@@ -119,7 +123,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[nisw]) return;
         proploc = (nisw * 8) + 1;//flowing northeast
-        accum += fa[nisw] * props[proploc];
+        addhere = fa[nisw] * props[proploc];
+        accum += addhere;
     }
     
     cnfd = fd[niw];
@@ -127,7 +132,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[niw]) return;
         proploc = (niw * 8) + 2; // flowing east
-        accum += fa[niw] * props[proploc];
+        addhere = fa[niw] * props[proploc];
+        accum += addhere;
     }
     
     cnfd = fd[ninw];
@@ -135,7 +141,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[ninw]) return;
         proploc = (ninw * 8) + 3;//flowing southeast
-        accum += fa[ninw] * props[proploc]; 
+        addhere = fa[ninw] * props[proploc];
+        accum += addhere;
     }
     
     cnfd = fd[nin];
@@ -143,7 +150,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[nin]) return;
         proploc = (nin * 8) + 4;//flowing south
-        accum += fa[nin] * props[proploc];
+        addhere = fa[nin] * props[proploc];
+        accum += addhere;
     }
 
     cnfd = fd[nine];
@@ -151,7 +159,8 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     {
         if (!ok[nine]) return;
         proploc = (nine * 8) + 5;//flowing southwest
-        accum += fa[nine] * props[proploc];
+        addhere = fa[nine] * props[proploc];
+        accum += addhere;
     }
 
     if (accum < 0.0) accum = 0.0;

@@ -3,62 +3,6 @@
 #include "io.h"
 #include "newflow.h"
 
-double calcprops(Data* data) {
-
-  double slopetot;
-  int width = data->mapInfo.width;
-  int height = data->mapInfo.height ;
-  int fullsize = width * height;
-  double propsum;
-  int counter;
-  int bigcounter;
-  int zeroslope;
-  counter = 0;
-  bigcounter = 0;
-  zeroslope = 0;
-  double propdiff;
-
-	  for (int i = 0; i < fullsize; i++)
-	  {
-			  slopetot = 0;
-			  propsum = 0;
-			  propdiff = 0;
-
-			  if (data->mask[i] == 1){
-
-					for(int k = 0; k < 8; k++)
-					{
-						slopetot += data->Slopes[i+k];
-					}
-
-                    if (slopetot == 0) zeroslope++;
-
-					for(int k = 0; k < 8; k++)
-					{
-						data->prop[i+k] = data->Slopes[i+k] / slopetot;
-						propsum += data->prop[i+k];
-					}
-
-                    if ((propsum > 1.0) || (propsum < 0.0)){
-						propdiff = 1.0 - propsum;
-					}
-
-					if (propdiff != 0.0)
-						{
-							// printf("illegal propsum for cell %d diff is [%15.12f] \n", i, propdiff);
-							counter++;
-							if (propdiff > 0.01) bigcounter ++;
-						}
-			  }
-	  }
-
-  printf("zero slope totals  %d \n", zeroslope);
-  printf("total number of non zero diff proportion entries = %d \n", counter);
-  printf("total number where propdiff > 0.01  = %d \n", bigcounter);
-
-  return(0);
-}
-
 
 double testoutletislowest(Data* data) {
  double lowest ;
@@ -669,8 +613,10 @@ void cuFlowDirection(Data* data, Data* device, int iter)
    int flatandsinkcount ;
    int negingrid;
    int cellsincatchment  ;
+   int fdtoobig;
    flatandsinkcount = 0;
    cellsincatchment = 0;
+   fdtoobig = 0;
    negingrid = 0;
 	// Validate Flow Directions and mapout cells which need to be ignored for later MFD
 
@@ -678,13 +624,15 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 		if ((data->mask[j] == 1))
 			  {
 				 cellsincatchment ++ ;
-					if (data->SFD[j] == 0) flatandsinkcount ++;
-					if (data->SFD[j] == -1) negingrid ++; // no longer used
+					if (data->fd[j] == 0) flatandsinkcount ++;
+					if (data->fd[j] == -1) negingrid ++; // no longer used
+                    if (data->fd[j] > 255) fdtoobig++ ;
 			  }
 	}
 
 	printf("Edge Flat and Sink count in catchment: %d of %d cells in catchment\n", flatandsinkcount, cellsincatchment );
 	printf("Negative FD in catchment: %d \n", negingrid);
+    printf("Too big FD in catchment: %d \n", fdtoobig);
 	fprintf(data->outlog,"Edge Flat and Sink count in catchment: %d of %d cells in catchment\n", flatandsinkcount, cellsincatchment );
 	fprintf(data->outlog,"Negative FD in catchment: %d \n", negingrid);
     fflush(data->outlog);
@@ -755,7 +703,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy((void *)data->fd, device->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost) );
   checkCudaErrors( cudaMemcpy((void *)data->SFD, device->SFD, sizeof(int) * fullsize, cudaMemcpyDeviceToHost) );
   checkCudaErrors( cudaMemcpy((void *)data->shortest_paths, device->shortest_paths, sizeof(float) * fullsize, cudaMemcpyDeviceToHost) );
-
+  checkCudaErrors( cudaMemcpy((void *)data->Slopes, device->Slopes, 8 * fullsize * sizeof(double), cudaMemcpyDeviceToHost));
 
   //write_float(data, data->shortest_paths, "sp2.txt");
 
@@ -787,7 +735,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   	}
  // #endif
 
-  	calcprops(data); // not needed until later?
+  	//calcprops(data); // not needed until later?
 
     fflush(data->outlog);
 
@@ -799,15 +747,11 @@ void cuFlowDirection(Data* data, Data* device, int iter)
     	fprintf(data->outlog,"FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError())); }
 
   	//checkCudaErrors(cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );
-  	checkCudaErrors(cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(double), cudaMemcpyDeviceToHost));
-#ifndef PRODUCTION_RUN
-  	printf(":sfd copy error %s\n", cudaGetErrorString(cudaGetLastError()));
-#endif
-
+  	//checkCudaErrors(cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(double), cudaMemcpyDeviceToHost));
 
  // bring back altered data
 	checkCudaErrors( cudaMemcpy(data->fd, device->fd, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyDeviceToHost) );
-	checkCudaErrors( cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyDeviceToHost) );
+	//checkCudaErrors( cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyDeviceToHost) );
 
 	 printf("outlet cell direction = %d\n", data->fd[data->outletcellidx])  ; // check the outlet cell direction was set by flow_boundary routine
 
