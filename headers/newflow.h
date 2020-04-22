@@ -64,6 +64,8 @@ class union_set
 
 void DirFlow (Data *data);
 
+void checkslopeandprop(Data* data);
+
 __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, int *SFD, double *prop, int *mfd, int flowtype, int cell_size, int ncell_x, int ncell_y, int *dx, int *dy, int last,int *sinkcounter, int *flatcounter);
 
 __global__ void flow_boundaryMFD( int *mask, double *zs, double *slopes, int *SFD, int *mfd, int ncell_x, int ncell_y);

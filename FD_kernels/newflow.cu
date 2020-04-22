@@ -57,50 +57,53 @@ void DirFlow (Data *data)
 				  { //dcell loop
 							cellx = icol + data->dx[dcell];
 							celly = irow + data->dy [dcell];
-							if (cellx >= 0 && cellx < ncell_x && celly >= 0 && celly < ncell_y) // for each of my neighbours
-							{
-							 newaspect = 2^((dcell + 6) % 8);
-							 /*if (dcell == 0)  newaspect = 64;
-							  if (dcell == 1)  newaspect = 128;
-							  if (dcell == 2)  newaspect = 1;
-							  if (dcell == 3)  newaspect = 2;
-							  if (dcell == 4)  newaspect = 4;
-							  if (dcell == 5)  newaspect = 8;
-							  if (dcell == 6)  newaspect = 16;
-							  if (dcell == 7)  newaspect = 32;*/
-									  if (dcell % 2 == 0)
-										dc = 1.0;   //even directions are cardinal
-									  else
-										dc = 1.41;  //odd directions are diagonals
-								  //calculate the slope
-								  thiscellht = data->dem[self];
-								  targetcellht = data->dem[celly * ncell_x + cellx];
-								  printf("thiscell %f, targetcell %f \n", thiscellht, targetcellht);
-								  stemp = (thiscellht - targetcellht) / (cell_size * dc);
-								  //printf("calculated slope = %f \n", stemp);
-									  if (targetcellht == -9999) {
-										  stemp = -0.0000001 ;} // needed to identify sinks on boundary
+                            if (cellx >= 0 && cellx < ncell_x && celly >= 0 && celly < ncell_y) // for each of my neighbours
+                            {
+                                newaspect = 2 ^ ((dcell + 6) % 8);
+                                /*if (dcell == 0)  newaspect = 64;
+                                 if (dcell == 1)  newaspect = 128;
+                                 if (dcell == 2)  newaspect = 1;
+                                 if (dcell == 3)  newaspect = 2;
+                                 if (dcell == 4)  newaspect = 4;
+                                 if (dcell == 5)  newaspect = 8;
+                                 if (dcell == 6)  newaspect = 16;
+                                 if (dcell == 7)  newaspect = 32;*/
+                                if (dcell % 2 == 0)
+                                    dc = 1.0;   //even directions are cardinal
+                                else
+                                    dc = 1.41;  //odd directions are diagonals
+                              //calculate the slope
+                                thiscellht = data->dem[self];
+                                targetcellht = data->dem[celly * ncell_x + cellx];
+                                printf("thiscell %f, targetcell %f \n", thiscellht, targetcellht);
+                                stemp = (thiscellht - targetcellht) / (cell_size * dc);
+                                //printf("calculated slope = %f \n", stemp);
+                                if (targetcellht == -9999) 
+                                {
+                                    stemp = -0.0000001;
+                                } // needed to identify sinks on boundary
 
-									  //store the slope and aspect value if it flows here i.e. down hill
-									  if (thiscellht > targetcellht)
-									  {
-										  downslopecount +=1;
-										  data->Slopes[self+dcell] = stemp;
-										  slopetot += data->Slopes[self+dcell];
-											  if (stemp > smax) // default aspect set to aspect of max slope for SFD
-											  {
-												  smax = stemp;
-												  aspectsfd = newaspect;
-												  //if (aspectsfd == 0) return;
-										       }
-										  aspect = aspect + newaspect; // for MFD
+        //store the slope and aspect value if it flows here i.e. down hill
+                                if (thiscellht > targetcellht)
+                                {
+                                    downslopecount += 1;
+                                    data->Slopes[self + dcell] = stemp;
+                                    slopetot += data->Slopes[self + dcell];
+                                    if (stemp > smax) // default aspect set to aspect of max slope for SFD
+                                    {
+                                        smax = stemp;
+                                        aspectsfd = newaspect;
+                                        //if (aspectsfd == 0) return;
+                                    }
+                                    aspect = aspect + newaspect; // for MFD
 
-										  //if (aspect == 0) return;
-									  }
-									  if (thiscellht < targetcellht) upslopecount += 1 ;
-									  if (thiscellht == targetcellht)   flatcount += 1;		  }
-							  }
-				  } //dcell loop i.e. look at my neighbours
+                                    //if (aspect == 0) return;
+                                }
+                                if (thiscellht < targetcellht) upslopecount += 1;
+                                if (thiscellht == targetcellht)   flatcount += 1;
+                            }
+                  }
+                } //dcell loop i.e. look at my neighbours
 
 							  if (upslopecount >7) {
 														  sinkcounter = sinkcounter +1;
@@ -133,13 +136,83 @@ void DirFlow (Data *data)
 							  upslopecount = 0;
 							  downslopecount = 0;
 
-		 } // in dem loop
-       } // icol
-	}// irow
+                              } // in dem loop
+            } // icol
+        }// irow
 
 			printf("Sinkcounter = %d \n", sinkcounter);
 			printf("flatcounter = %d \n", flatcounter);
+}
 
+void checkslopeandprop(Data* data)
+{
+    int self;
+    int idx;
+    int counter;
+
+    counter = 0;
+
+    for (int irow = 0; irow < data->mapInfo.height; irow++)  //irow loop
+    {
+        for (int icol = 0; icol < data->mapInfo.width; icol++) //icol loop
+        {
+            self = self = irow * data->mapInfo.height + icol;
+
+            if (data->mask[self] == 1)
+            {
+
+                for (int dcell = 0; dcell < 8; dcell++)
+                { //dcell loop
+                    if ((data->prop[self + dcell] > 0) && (data->Slopes[self + dcell] == 0.0))
+                        printf(" prop allocated to direction with no slope %d \n", self);
+
+                    idx = self + dcell;
+
+                    if ((data->fd[self] == 1) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                    if ((data->fd[self] == 2) && (data->prop[idx] != 1)) {
+                    printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                    counter++;
+                    }
+
+                    if ((data->fd[self] == 4) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                    if ((data->fd[self] == 8) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                    if ((data->fd[self] == 16) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                    if ((data->fd[self] == 32) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                    if ((data->fd[self] == 64) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                    if ((data->fd[self] == 128) && (data->prop[idx] != 1)) {
+                        printf("SFD %d has proportion %lf \n", data->fd[self], data->prop[idx]);
+                        counter++;
+                    }
+
+                }
+            }
+        }
+    }
+    printf("prop and slope check complete %d \n", counter);
 }
 
 __device__ int look(int client, int nghbr, int gridCols)
@@ -358,14 +431,14 @@ __global__ void flow_boundaryMFD( int *mask, double *dem, double *slopes, int *S
 
        SFD[self] = 0; mfd[self] = 0;
        slopeidx = self * 8;
-       if (dem[east] == -9999.) { SFD[self] = 1; mfd[self] = 1; slopes[slopeidx + 2] = 0.0001 ; }; // I can go east and don't include me in future calculations
-       if (dem[southeast] == -9999.) { SFD[self] = 2;mfd[self] = 2; slopes[slopeidx + 3] = 0.0001; }; // I can go southeast
-       if (dem[south] == -9999.) { SFD[self] = 4;mfd[self] = 4; slopes[slopeidx + 4] = 0.0001; }; // I can go south
-       if (dem[southwest] == -9999.) { SFD[self] = 8;mfd[self] = 8; slopes[slopeidx + 5] = 0.0001; }; // go southwest
-       if (dem[west] ==-9999.) { SFD[self] = 16;mfd[self] = 16; slopes[slopeidx + 6] = 0.0001; }; // go west
-       if (dem[northwest] ==-9999.) { SFD[self] = 32;mfd[self] = 32; slopes[slopeidx + 7] = 0.0001; }; // go northwest
-       if (dem[north] == -9999.)  { SFD[self] = 64;mfd[self] = 64; slopes[slopeidx + 0] = 0.0001; }; ; // gp north
-       if (dem[northeast] == -9999.) { SFD[self] = 128;mfd[self] = 128; slopes[slopeidx + 1] = 0.0001;  }; // go northeast
+       if (dem[east] == -9999.) { SFD[self] = 1; mfd[self] = 1; }; // I can go east and don't include me in future calculations
+       if (dem[southeast] == -9999.) { SFD[self] = 2;mfd[self] = 2;  }; // I can go southeast
+       if (dem[south] == -9999.) { SFD[self] = 4;mfd[self] = 4; };; // I can go south
+       if (dem[southwest] == -9999.) { SFD[self] = 8;mfd[self] = 8; };; // go southwest
+       if (dem[west] ==-9999.) { SFD[self] = 16;mfd[self] = 16; };; // go west
+       if (dem[northwest] ==-9999.) { SFD[self] = 32;mfd[self] = 32; };; // go northwest
+       if (dem[north] == -9999.)  { SFD[self] = 64;mfd[self] = 64; };; // go north
+       if (dem[northeast] == -9999.) { SFD[self] = 128;mfd[self] = 128; }; // go northeast
 }
 
 //***************************************************
@@ -421,7 +494,7 @@ __global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double 
 
 	//if (SFD[self] < 0) return;
 
-	//__syncthreads();
+	__syncthreads();
 
   // Get the current shortest path for this cell
 	float min_distance = shortest_paths[self];
@@ -431,11 +504,14 @@ __global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double 
 		return;
 
 	// double stemp; // use the same slope nomenclature;
+    index = self * 8;
 
+ 
 	// double this_ele = zs[irow * ncell_x + icol];
 	for (dcell = 0; dcell < 8; dcell ++)
 	{
-		//newaspect = 2^((dcell + 6) % 8);
+        //slopes[index + dcell] = 0.0;
+        //newaspect = 2^((dcell + 6) % 8);
 		  if (dcell == 0)  newaspect = 64;
 		  if (dcell == 1)  newaspect = 128;
 		  if (dcell == 2)  newaspect = 1;
@@ -477,8 +553,7 @@ __global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double 
 				*change_flag = 1;  // don't care how many cells have changed - just that cells have changed
 				fd[self] = newaspect;
 				SFD[self] = newaspect;
-                index = (self * 8) + dcell;
-                slopes[index] = 0.0001;
+                slopes[index+dcell] = 0.0001;
                 //props[self + dcell] = 1;
 				shortest_paths[self] = min_distance;
 				lowHeight[self] = lowHeight[celly * ncell_x + cellx];

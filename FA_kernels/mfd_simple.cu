@@ -47,7 +47,7 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
 
     // Are we outside the DEM?
     if(icol >= gridCols || irow >= gridRows) return; // if outside of DEM nothing to do
-    //if(icol == 0 || irow == 0 ) return; // if outside of DEM nothing to do
+    //if (icol == 0) || irow == 0 ) return; // if outside of DEM nothing to do
 
     if (mask[self] != 1 ) return;
 
@@ -68,8 +68,9 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     nin  = nghbrindex(self, NORTH,     gridCols);
     nine = nghbrindex(self, NORTHEAST, gridCols);
 
-    accum = weights[self];
-    
+    accum = 0.;
+    fa[self] = weights[self];
+
 	  // ORIGINAL CODE directions
 	  // NW  N NE    7  0  1
 	  //  W  *  E    6  8  2
@@ -113,7 +114,7 @@ __global__ void CalcMFD(int *mask, double *hv, int *fd, double *fa, double* prop
     if (cnfd & NORTH)
     {
         if (!ok[nis]) return;
-        proploc = (nis * 8) + 7;//flowing north
+        proploc = (nis * 8) + 0;//flowing north
         addhere = fa[nis] * props[proploc];
         accum += addhere;
     }
@@ -257,10 +258,10 @@ void correctmfdflow(Data* data, Data* device, int iter)
 	}
 
    int doublefull;
-   doublefull = fullsize * sizeof(double);
+   doublefull = fullsize * sizeof(double) * 8;
 
    cudaMemcpy(device->fa, data->fa, fullsize * sizeof(double), cudaMemcpyHostToDevice);
-   checkCudaErrors(cudaMemcpy(device->prop, data->prop, 8 * doublefull, cudaMemcpyHostToDevice));
+   checkCudaErrors(cudaMemcpy(device->prop, data->prop, doublefull, cudaMemcpyHostToDevice));
 
 
   fflush(data->outlog);
@@ -298,10 +299,10 @@ void correctmfdflow(Data* data, Data* device, int iter)
 	//printf("gridProgress = %d\n", gridprogress);
 	//printf("cuda error NOW2:%s\n", cudaGetErrorString(cudaGetLastError()));
     totalGP += gridprogress;
-    printf("%d / %d (%f %%)\n", totalGP, nrows * ncols, (double) totalGP / (nrows * ncols) * 100);
+    printf("%d / %d (%f %%)\n", totalGP, data->activecells, (double) totalGP / data->activecells * 100);
     /* ---- end of second run ---- */
     loop ++;
-  } while (gridprogress > 0); // && (double) totalGP / (GRDCOLS * GRDROWS)  < 0.99);
+  } while ((gridprogress > 0));// && (((double)totalGP / (nrows * ncols)) < 0.99));
 
 #ifndef PRODUCTION_RUN
   printf("About to finish FA_MFD\n");

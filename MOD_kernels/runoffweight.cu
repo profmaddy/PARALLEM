@@ -143,6 +143,7 @@ void calcprops(Data* data) {
 	double propdiff;
 	int count;
 	int slopeidx;
+	int propdircount;
 
 	slopeidx = 0;
 	count = 0;
@@ -157,38 +158,179 @@ void calcprops(Data* data) {
 
 			slopeidx = i * 8;
 			count++;
+			propdircount = 0;
+
 			//if (count < 30) printf("fd: %d \n", data->fd[i]);
 			//if (count < 30) printf("slopes [0][1][2][3][4][5][6][7] :");
 			for (int k = 0; k < 8; k++)
 			{
 				slopetot += data->Slopes[slopeidx + k];
-				//if (count < 30) printf("[%lf]", data->Slopes[slopeidx + k]);
-				
+				if ((data->Slopes[slopeidx + k]) < 0) printf("slope is negative %lf \n", data->Slopes[slopeidx + k]);
+
 			}
 			//if (count < 30) printf("total = %lf\n", slopetot);
-			
+
 			if (slopetot == 0) {
 				zeroslope++;  // this is counting the flats with no slope?
 				//printf("zeroslope at %d with fd[%d]\n", i, data->fd);
 			}
 
 			//if (count <30) printf("props @ %d [0][1][2][3][4][5][6][7] :", i);
+
+			
+
 			for (int k = 0; k < 8; k++)
 			{
 				data->prop[slopeidx + k] = data->Slopes[slopeidx + k] / slopetot;
+				if (data->prop[slopeidx + k] > 0) propdircount++;
 				propsum += data->prop[slopeidx + k];
-				//if (count < 30 || slopetot == 0)printf("fd[%d]\n[%lf]", data->fd[i], data->prop[slopeidx + k]);
 			}
+
+			if ((data->fd[i] == 1) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 2) 
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else 
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+			
+			if ((data->fd[i] == 2) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 3)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+
+			if ((data->fd[i] ==4) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 4)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+
+			if ((data->fd[i] == 8) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 5)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+			
+			if ((data->fd[i] == 16) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 6)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+
+			if ((data->fd[i] == 32) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 7)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+
+			if ((data->fd[i] == 64) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 0)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+			
+			if ((data->fd[i] == 128) && (propdircount > 1))
+			{
+				counter++;
+				for (int z = 0; z < 8; z++) {
+					if (z == 1)
+					{
+						data->Slopes[slopeidx + z] = 0.0001;
+						data->prop[slopeidx + z] = 1;
+					}
+					else
+					{
+						data->Slopes[slopeidx + z] = 0;
+						data->prop[slopeidx + z] = 0;
+					}
+				}
+			}
+
+
+			if (propsum == 0)printf("cell %d, fd[%d],[%lf] \n]", i, data->fd[i], propsum);
 			//if (count < 30 || slopetot == 0) printf("total prop %lf\n", propsum);
 
-			if ((propsum > 1.0) || (propsum < 0.0)) {
-				propdiff = 1.0 - propsum;
-			}
+			propdiff = abs( 1 - propsum) ;
 
-			if (propdiff != 0.0)
+			if ( propsum !=1.0 ) 
 			{
 				// printf("illegal propsum for cell %d diff is [%15.12f] \n", i, propdiff);
-				counter++;
 				if (propdiff > 0.01) bigcounter++;
 			}
 		}

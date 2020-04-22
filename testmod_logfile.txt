@@ -50,8 +50,8 @@ FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: route plateaus :no error
-FD: Routed plateaus in 43 iterations. Now starting flooding driver... 
-FD: time to complete flow routing routine algorithm 2.053783 s
+FD: Routed plateaus in 42 iterations. Now starting flooding driver... 
+FD: time to complete flow routing routine algorithm 2.076132 s
 FD: Memory on CUDA card free at end of routing: 6263808 total: 8388608
 FD: error after FD clear :no error
 FD: Memory on CUDA card free after FD space freed: 6349760 total: 8388608 
@@ -69,7 +69,7 @@ FA: okGrid copy back :no error
 Number of actual cells not computed = 0
 FA: FA memcopy operation 0 :no error
 FA: FA memcopy operation 1 :no error
-FA: Maximum FA is  150.099566 
+FA: Maximum FA is  646264.933307 
 
 FA: Outletcell index is  30195 
 
@@ -86,6 +86,6 @@ MOD: Memory on CUDA card free after model matrix space allocated: 5624320 total:
 MOD: Memory on CUDA card free after model space freed: 6444992 total: 8388608 
 MOD: Clear matrix operations :invalid argument
 Ave erosion rate mm/a : -142399432845104349186908209363542809351657316719458779136.00000000 
-Total simulation time of : 14.16900000000000048 
+Total simulation time of : 15.42999999999999972 
 
 All hosts matrices memory freed 

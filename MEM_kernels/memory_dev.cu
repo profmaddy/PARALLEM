@@ -38,7 +38,7 @@ void setdevicespace_FD(Data* data, Data* device)
 	 int ncell_x = data->mapInfo.width;
 	 int ncell_y = data->mapInfo.height;
 	 fullsize= ncell_x * ncell_y;
-	 doublefull = fullsize* sizeof(double);
+	 doublefull = fullsize* sizeof(double) *8;
 
 	 checkCudaErrors( cudaMalloc((void**)&(device->fd), fullsize * sizeof(int)) );
 	 checkCudaErrors( cudaMalloc((void**)&(device->SFD), fullsize * sizeof(int)) );
@@ -51,8 +51,8 @@ void setdevicespace_FD(Data* data, Data* device)
 	 checkCudaErrors( cudaMalloc((void**)&(device->flatmask),     fullsize * sizeof(int))    );
 	  fprintf(data->outlog, "FD: setdevicespace0:%s\n", cudaGetErrorString(cudaGetLastError()));
 
-	 checkCudaErrors( cudaMalloc((void**)&(device->Slopes), 8 * doublefull) );
-	 checkCudaErrors( cudaMalloc((void**)&(device->prop),   8 * doublefull) );
+	 checkCudaErrors( cudaMalloc((void**)&(device->Slopes), doublefull) );
+	 checkCudaErrors( cudaMalloc((void**)&(device->prop),   doublefull) );
 	  fprintf(data->outlog, "FD: setdevicespace1:%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	  cudaMemGetInfo(&freenow, &total);
@@ -109,7 +109,7 @@ void setdevicespace_FA(Data* data, Data* device)
 
 	//checkCudaErrors(cudaSetDevice(0));
 	//checkCudaErrors( cudaMemcpy( device->fa, data->fa, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
-	checkCudaErrors( cudaMemcpy( device->fd, data->SFD, full_size * sizeof(int), cudaMemcpyHostToDevice)) ;
+	checkCudaErrors( cudaMemcpy( device->fd, data->fd, full_size * sizeof(int), cudaMemcpyHostToDevice)) ;
 	checkCudaErrors( cudaMemcpy( device->runoffweight, data->runoffweight, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
 
 	checkCudaErrors( cudaMemcpy( device->rainmat, data->rainmat, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;

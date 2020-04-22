@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "memory_dev.h"
 #include "routeflow.h"
+#include "newflow.h"
 #include "mfd_simple.h"
 #include "runoffweight.h"
 
@@ -103,6 +104,7 @@ int main(int argc, char* argv[]) {
 		computeRunOffWeights(&data, &device); // calculate runoff
 		calcwater(&data);
 		calcprops(&data); 
+		//checkslopeandprop(&data);
 		correctmfdflow(&data, &device, i); // calculate flow accumulation (MFD)
 		cleardevicespace_FA(&data, &device);
 
