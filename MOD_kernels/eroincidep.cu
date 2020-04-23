@@ -1,6 +1,40 @@
 // Simple Process Kernels for calculating diffuse and concentrated erosion, returning them in erosion and incision matrices
 
 #include "eroincidep.h"
+#include "io.h"
+#include <thrust/reduce.h>
+
+
+void aveslope(Data* data, Data* device)
+{
+	int ncell_x = data->mapInfo.width;
+	int ncell_y = data->mapInfo.height;
+	int fullsize = ncell_x * ncell_y;
+	double total;
+	int nonzero;
+	int self;
+
+	for (int i = 0; i < fullsize; i++)
+	{
+		self = i * 8;
+		data->SlopePtr[i] = 0.0;
+		if (data->mask[i] == 1) 
+		{
+			total = 0;
+			nonzero = 0;
+			for (int j = 0; j < 8; j++)
+			{
+				total += data->Slopes[self + j];
+				if (data->Slopes[self + j] > 0) nonzero++;
+			}
+			if (( total > 0) && (nonzero > 0)) data->SlopePtr[i] = total / nonzero;
+		}
+	}
+	checkCudaErrors(cudaMemcpy( device->SlopePtr, data->SlopePtr, fullsize * sizeof(double), cudaMemcpyHostToDevice));
+
+	write_double(data, data->SlopePtr, "aveslope.txt");
+
+}
 
 __global__ void diff_erosion(int *mask, double *ePtr_d, double *FAPtr_d, double *SlopePtr_d, double *finesPtr_d, double *nutPtr_d,  double *soilTPtr_d, double *stonePtr_d, double *TotBPtr_d,
 				                                     int soil_struct, int profile_permeability, int ncell_x, int ncell_y, double Qthreshold)
@@ -48,7 +82,7 @@ __global__ void diff_erosion(int *mask, double *ePtr_d, double *FAPtr_d, double 
 
 	if (answer > (soilTPtr_d[self])) answer = soilTPtr_d[self];
 	ePtr_d[self] = answer;
-
+	
 }
 
 __global__ void conc_erosion( int *mask, double *inciPtr, double *FAPtr, double *SlopePtr, double *TotBPtr,
@@ -307,16 +341,6 @@ void calc_diff_erosion(Data* data, Data* device)
 	fprintf(data->outlog, "MOD: diff_erosion :%s\n", cudaGetErrorString(cudaGetLastError()));
 	checkCudaErrors( cudaMemcpy ( data->eroPtr,   device->eroPtr,   full_size * sizeof(double), cudaMemcpyDeviceToHost) );
 
-	thrust::device_ptr<double> difftot_d = thrust::device_pointer_cast(device->eroPtr);
-	cudaSetDevice(0);
-	data->totE = thrust::reduce(difftot_d, difftot_d + full_size, (double) 0);
-	fprintf(data->outlog, "total concentrated  from thrust is %10.8lf \n", data->totE);
-
-	if (data->totE == NAN)
-	{
-		printf("data from totE is NaN \n");
-		exit(0);
-	}
 }
 
 void calc_conc_erosion(Data* data, Data* device)
@@ -337,17 +361,7 @@ void calc_conc_erosion(Data* data, Data* device)
 			                                           data->Flow_A, data->Flow_B, data->Flow_C, data->max_incision);
 
 	fprintf(data->outlog, "MOD: conc_erosion :%s\n", cudaGetErrorString(cudaGetLastError()));
-	checkCudaErrors( cudaMemcpy ( data->eroPtr,   device->eroPtr,   full_size * sizeof(double), cudaMemcpyDeviceToHost) );
-
-	thrust::device_ptr<double> incitot_d = thrust::device_pointer_cast(device->inciPtr);
-	cudaSetDevice(0);
-	data->totI = thrust::reduce(incitot_d, incitot_d + full_size, (double) 0);
-	fprintf(data->outlog, "total Incision from thrust is %10.8lf \n", data->totI);
-
-	if (data->totI == NAN) {
-		printf("data from totI is NaN \n");
-		exit(0);
-	}
+	checkCudaErrors( cudaMemcpy ( data->inciPtr,   device->inciPtr,   full_size * sizeof(double), cudaMemcpyDeviceToHost) );
 }
 
 void calc_gelifluction(Data* data, Data* device)
@@ -375,17 +389,7 @@ void calc_gelifluction(Data* data, Data* device)
 
 	fprintf(data->outlog, "MOD: gelifluction :%s\n", cudaGetErrorString(cudaGetLastError()));
 	checkCudaErrors( cudaMemcpy ( data->geliPtr,   device->geliPtr,   full_size * sizeof(double), cudaMemcpyDeviceToHost) );
-
-	thrust::device_ptr<double> gelitot_d = thrust::device_pointer_cast(device->geliPtr);
-	cudaSetDevice(0);
-	data->totG = thrust::reduce(gelitot_d, gelitot_d + full_size, (double) 0);
-	fprintf(data->outlog, "total gelifluction from thrust is %10.8lf \n", data->totG);
-
-
-	if (data->totG == NAN) {
-		printf("data from totG is NaN \n");
-		exit(0);
-	}
+	
 }
 
 

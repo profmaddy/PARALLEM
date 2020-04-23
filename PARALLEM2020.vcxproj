@@ -120,6 +120,9 @@
       <AdditionalUsingDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\darre\source\repos\PARALLEM2020\headers;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <ClCompile Include="MEM_kernels\io.cpp" />
+    <ClCompile Include="oldcode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

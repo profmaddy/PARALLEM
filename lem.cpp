@@ -9,6 +9,7 @@
 #include "newflow.h"
 #include "mfd_simple.h"
 #include "runoffweight.h"
+#include "erosion.h"
 
 int main(int argc, char* argv[]) {
 
@@ -26,6 +27,8 @@ int main(int argc, char* argv[]) {
 	if (!pars) pars = "default.par"; // use the default values
 	createfilenamespace(&data);
 	readinpar(&data, pars);
+	data.demfile = "30mfam.asc";
+	//data.demfile = "pal25_bi20mod.asc";
 	checkparread(&data);
 
 	// output file for  data used in debugging
@@ -104,7 +107,6 @@ int main(int argc, char* argv[]) {
 		computeRunOffWeights(&data, &device); // calculate runoff
 		calcwater(&data);
 		calcprops(&data); 
-		//checkslopeandprop(&data);
 		correctmfdflow(&data, &device, i); // calculate flow accumulation (MFD)
 		cleardevicespace_FA(&data, &device);
 
@@ -112,7 +114,7 @@ int main(int argc, char* argv[]) {
 	write_double(&data, data.fa, data.FAfile);
 
 	    setdevicespace_Process(&data, &device);
-	     //erosionGPU(&data, &device, i);
+	     erosionGPU(&data, &device, i);
 	    cleardevicespace_Process(&data, &device);
 
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration

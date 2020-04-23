@@ -254,7 +254,7 @@ int copyMask(Data* data, Data* device)
 	 fprintf(data->outlog, "Mask data sent to device %s\n", cudaGetErrorString(cudaGetLastError()));
 
 	thrust::device_ptr<int> activecells = thrust::device_pointer_cast(device->mask);
-	//data->activecells  = thrust::count(activecells, activecells + fullsize, 1);
+	data->activecells  = thrust::count(activecells, activecells + fullsize, 1);
 
 #ifndef PRODUCTION_RUN
 	printf("No of active cells = %d \n", data->activecells);

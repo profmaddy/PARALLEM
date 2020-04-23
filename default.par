@@ -1,7 +1,7 @@
 PARALLEM PARAMETER FILE
 07/04/2020
 testmod
-30mfam.asc
+30mfam.asc			
 climateF.txt
 soilT.tif
 0                                       #restart 0=no otherwise yes

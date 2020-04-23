@@ -105,7 +105,7 @@ int computeRunOffWeights(Data* data, Data* device)
 	double sumRO;
 	double aveRO;
 
-	data->activecells = 1337310;
+	//data->activecells = 1337310;
 
 	maxRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 0, thrust::maximum<double>());
 	minRO = thrust::reduce(summary_d, summary_d + data->activecells, (double) 10, thrust::minimum<double>());

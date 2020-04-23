@@ -43,6 +43,9 @@
     <ClCompile Include="MEM_kernels\io.cpp">
       <Filter>MEM</Filter>
     </ClCompile>
+    <ClCompile Include="oldcode.cpp">
+      <Filter>oldcode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -62,6 +65,9 @@
     </Filter>
     <Filter Include="MOD">
       <UniqueIdentifier>{1887aee8-4eeb-4659-a54b-52b9cc391f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oldcode">
+      <UniqueIdentifier>{f8d824fd-93a1-45ea-a9f9-e4931c799d44}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

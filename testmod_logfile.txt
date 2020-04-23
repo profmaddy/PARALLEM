@@ -4,7 +4,7 @@ Bedrock file   =  soilT.tif
 logfile: testmod_logfile.txt
 Max_iterations:1. 
 Summary file data in testmod_budgets.csv 
-Memory on CUDA card free at start of iteration: 6829312 total: 8388608
+Memory on CUDA card free at start of iteration: 6825216 total: 8388608
 climate file read 
 ncols 1542 
 nrows 2032 
@@ -26,14 +26,14 @@ soilMoisture: 0.500000, nutrients: 10.000000, soilBio: 0.000000, TotalBio: 495.3
 Performing the simulation
 set device to zero :no error
 Allocated DEM and slope matrices on device :no error
-Memory on CUDA card free after device DEM and slope grids allocated: 6743488 total: 8388608 
+Memory on CUDA card free after device DEM and slope grids allocated: 6522816 total: 8388608 
 
 ***********************
 Starting mode testmod Iteration 1 of 1
 ***********************
 FD: setdevicespace0:no error
 FD: setdevicespace1:no error
-Memory on CUDA card free after FD space allocated: 6263808 total: 8388608 
+Memory on CUDA card free after FD space allocated: 6043136 total: 8388608 
 FD: setdevicespace2:no error
 FD: starting cuFlowDirection :no error
 FD: dev mem allocate shortest_path, fdmod, watershed_id :no error
@@ -50,11 +50,11 @@ FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: first route_plateaus_init :no error
 FD: route plateaus :no error
-FD: Routed plateaus in 42 iterations. Now starting flooding driver... 
-FD: time to complete flow routing routine algorithm 2.076132 s
-FD: Memory on CUDA card free at end of routing: 6263808 total: 8388608
+FD: Routed plateaus in 43 iterations. Now starting flooding driver... 
+FD: time to complete flow routing routine algorithm 2.078989 s
+FD: Memory on CUDA card free at end of routing: 6043136 total: 8388608
 FD: error after FD clear :no error
-FD: Memory on CUDA card free after FD space freed: 6349760 total: 8388608 
+FD: Memory on CUDA card free after FD space freed: 6129088 total: 8388608 
 
 FA: setdevicespace_FA:no error
 FA: calcrunoffweight:no error
@@ -77,15 +77,17 @@ FA: Bad value count (i.e. not in catchment(s) = 0
 time to complete correctflowMFD algorithm -107374.176000 s
 
 FA: End of FA :invalid resource handle
-FA: Memory on CUDA card free after FA space freed: 5930752 total: 8388608 
+FA: Memory on CUDA card free after FA space freed: 5926656 total: 8388608 
 
 FA: cleardevicespace_FA:no error
 MOD: setdevicespace_Process :no error
 MOD: Matrix memcopy operations :no error
-MOD: Memory on CUDA card free after model matrix space allocated: 5624320 total: 8388608 
-MOD: Memory on CUDA card free after model space freed: 6444992 total: 8388608 
-MOD: Clear matrix operations :invalid argument
-Ave erosion rate mm/a : -142399432845104349186908209363542809351657316719458779136.00000000 
-Total simulation time of : 15.42999999999999972 
-
-All hosts matrices memory freed 
+MOD: Memory on CUDA card free after model matrix space allocated: 5620224 total: 8388608 
+MOD: Starting Model Process Routines 
+MOD: diff_erosion :no error
+total concentrated  from thrust is 1137.61308086 
+MOD: conc_erosion :no error
+total Incision from thrust is 344.86907023 
+FA_max before gelifluction 646264.933307 
+MOD: gelifluction :no error
+total gelifluction from thrust is 38573.76986667 

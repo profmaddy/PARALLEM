@@ -568,9 +568,6 @@ void cuFlowDirection(Data* data, Data* device, int iter)
    flatcounter_h = (int *)malloc(sizeof(int));
    checkCudaErrors( cudaMalloc((void **)&flatcounter_d, sizeof(int)) );
 
-/*   for (int i= 0; i<2; i++)
-   { */
-
 	   *sinkcounter_h = 0;
 	   *flatcounter_h = 0;
 	   checkCudaErrors( cudaMemcpy(sinkcounter_d, sinkcounter_h, sizeof(int), cudaMemcpyHostToDevice) );
@@ -742,9 +739,10 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	//data->FDfile = "fdwithsinks.txt";
 	//write_int(data, data->fd, data->FDfile);
 
-    if (sinkcount > 1){
-  	 //floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize /*data->mapInfo.cellsize*/, iter);
-    	fprintf(data->outlog,"FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError())); }
+    if (sinkcount > 1) {
+        floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize /*data->mapInfo.cellsize*/, iter);
+        fprintf(data->outlog, "FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError()));
+    }
 
   	//checkCudaErrors(cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );
   	//checkCudaErrors(cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(double), cudaMemcpyDeviceToHost));

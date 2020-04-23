@@ -23,6 +23,7 @@
 #include <thrust/execution_policy.h>
 #include "production.h"
 
+void aveslope(Data* data, Data* device);
 void calc_diff_erosion(Data* data, Data* device);
 void calc_conc_erosion(Data* data, Data* device);
 void calc_gelifluction(Data* data, Data* device);

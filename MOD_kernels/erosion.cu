@@ -7,6 +7,9 @@
 
 #include "updates.h"
 #include "mfd_accum.h"
+#include <thrust/reduce.h>
+#include <iostream>
+#include "io.h"
 
 void erosionGPU(Data* data, Data* device, int iter)
 {
@@ -30,10 +33,32 @@ void erosionGPU(Data* data, Data* device, int iter)
 		
 	fprintf(data->outlog, "MOD: Starting Model Process Routines \n");
 
+	//calc averageslope SlopePtr and transfer to device
+	aveslope(data, device);
+
 	calc_diff_erosion(data, device);
+		//write_double(data, data->eroPtr, "differo.txt");
+		thrust::device_ptr<double> difftot_d = thrust::device_pointer_cast(device->eroPtr);
+		data->totE = thrust::reduce(difftot_d, difftot_d + full_size);
+		fprintf(data->outlog, "total concentrated  from thrust is %10.8lf \n", data->totE);
+		printf("total concentrated  from thrust is %f \n", data->totE);
 
 	calc_conc_erosion(data, device);
+		//write_double(data, data->inciPtr, "concero.txt");
+		thrust::device_ptr<double> incitot_d = thrust::device_pointer_cast(device->inciPtr);
+		cudaSetDevice(0);
+		data->totI = thrust::reduce(incitot_d, incitot_d + full_size, (double)0);
+		fprintf(data->outlog, "total Incision from thrust is %10.8lf \n", data->totI);
+		printf("total Incision from thrust is %10.8lf \n", data->totI);
+
 	calc_gelifluction(data, device);
+		//write_double(data, data->geliPtr, "geliero.txt");
+		thrust::device_ptr<double> gelitot_d = thrust::device_pointer_cast(device->geliPtr);
+		cudaSetDevice(0);
+		data->totG = thrust::reduce(gelitot_d, gelitot_d + full_size, (double)0);
+		fprintf(data->outlog, "total gelifluction from thrust is %10.8lf \n", data->totG);
+		printf("total gelifluction from thrust is %10.8lf \n", data->totG);
+	
 
 	fflush(data->outlog);
 
@@ -44,11 +69,11 @@ void erosionGPU(Data* data, Data* device, int iter)
 	// sedmfdaccum(data, device);
 	fprintf(data->outlog, "MOD: returned from sedmfdaccum :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-	checkCudaErrors( cudaMemcpy ( data->eroPtr,   device->eroPtr,   full_size * sizeof(double), cudaMemcpyDeviceToHost) );
+
 	checkCudaErrors( cudaMemcpy ( data->geliPtr,  device->geliPtr,  full_size * sizeof(double), cudaMemcpyDeviceToHost) );
-	checkCudaErrors( cudaMemcpy ( data->inciPtr,  device->inciPtr,  full_size * sizeof(double), cudaMemcpyDeviceToHost) );
+
 	checkCudaErrors( cudaMemcpy ( data->depoPtr,  device->depoPtr,  full_size * sizeof(double), cudaMemcpyDeviceToHost) );
-	checkCudaErrors( cudaMemcpy ( data->SlopePtr, device->SlopePtr, full_size * sizeof(double), cudaMemcpyDeviceToHost) );
+	checkCudaErrors(cudaMemcpy(data->SlopePtr, device->SlopePtr, full_size * sizeof(double), cudaMemcpyDeviceToHost));
 	fprintf(data->outlog, "MOD: ero/inc/dep/slope memcopy :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	calc_dz(data,device); // now includes gelifluction erosion
