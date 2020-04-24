@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	copyMask(&data, &device); // copy mask to device only needs to be done once
 
 	SetClimateMatrices(&data, -10000) ; // setup the climate gradients for ppt and temp
-	//copylastclimate(&data, &device);// this copies the last climate matrices and frees host memory
+	copylastclimate(&data, &device);// this copies the last climate matrices and frees host memory
 
 	createProcessMatrices(&data); // allocate sufficient memory on host
 	setProcessMatrices(&data);  // initialise values for attributes on host based upon parameter file inputs
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
 
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration
 		zerogrids(&data);
-/*
+
 	//if (modelruntype ==0){copytolastclimate(&data, &device);} //copy climate matrices to lastclimte before erasing
 
 		cudaMemGetInfo(&freenow, &total);
@@ -132,10 +132,7 @@ int main(int argc, char* argv[]) {
 
 	clearDeviceSpace(&data, &device);
 	free(data.dem);
-	
-	char * burnfile = "burn.tif";
- 	//writeGRIDtoFile(&data, burnfile, 0,0 );
-	*/
+
 	endrun = clock();
 	Ptime = (double) (endrun-startrun)/ CLOCKS_PER_SEC ;
 	fprintf(data.outlog, "Total simulation time of : %20.17lf \n\n", Ptime);

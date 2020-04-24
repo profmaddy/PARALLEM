@@ -103,6 +103,7 @@ void erosionGPU(Data* data, Data* device, int iter)
 	checkCudaErrors( cudaMemcpy ( data->nutPtr,   device->nutPtr,   full_size * sizeof(double), cudaMemcpyDeviceToHost) );
 	fprintf(data->outlog, "MOD: conc_soilB/nutB copyback :%s\n", cudaGetErrorString(cudaGetLastError()));
 
+	fflush(data->outlog);
 	// Now grow the vegetation
 	update_vegetation(data,device);
 

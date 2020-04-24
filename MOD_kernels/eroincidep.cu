@@ -32,7 +32,7 @@ void aveslope(Data* data, Data* device)
 	}
 	checkCudaErrors(cudaMemcpy( device->SlopePtr, data->SlopePtr, fullsize * sizeof(double), cudaMemcpyHostToDevice));
 
-	write_double(data, data->SlopePtr, "aveslope.txt");
+	//write_double(data, data->SlopePtr, "aveslope.txt");
 
 }
 
@@ -412,8 +412,8 @@ void calc_dz(Data* data, Data* device)
 	double max_dz, min_dz;
 	thrust::device_ptr<double> max_dz_d = thrust::device_pointer_cast(device->dz);
 	thrust::device_ptr<double> min_dz_d = thrust::device_pointer_cast(device->dz);
-	max_dz = thrust::reduce(max_dz_d, max_dz_d + full_size, (double) 0, thrust::maximum<double>() );
-	min_dz = thrust::reduce(min_dz_d, min_dz_d + full_size, (double) 0, thrust::minimum<double>() );
+	max_dz = thrust::reduce(max_dz_d, max_dz_d + full_size, (double) -1, thrust::maximum<double>() );
+	min_dz = thrust::reduce(min_dz_d, min_dz_d + full_size, (double) 1, thrust::minimum<double>() );
 	printf("Maximum dz = %f, Minimum dz = %f \n", max_dz, min_dz);
 }
 

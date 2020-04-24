@@ -580,8 +580,8 @@ void cuFlowDirection(Data* data, Data* device, int iter)
        fflush(data->outlog);
 
        checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
-       data->FDfile = "afterFlowDirs.txt";
-       write_int(data, data->fd, data->FDfile);
+      // data->FDfile = "afterFlowDirs.txt";
+      // write_int(data, data->fd, data->FDfile);
 
 	   checkCudaErrors( cudaMemcpy(sinkcounter_h, sinkcounter_d, sizeof(int) ,cudaMemcpyDeviceToHost) );
 	   checkCudaErrors( cudaMemcpy(flatcounter_h, flatcounter_d, sizeof(int) ,cudaMemcpyDeviceToHost) );
@@ -732,9 +732,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   	}
  // #endif
 
-  	//calcprops(data); // not needed until later?
-
-    fflush(data->outlog);
+     fflush(data->outlog);
 
 	//data->FDfile = "fdwithsinks.txt";
 	//write_int(data, data->fd, data->FDfile);

@@ -325,8 +325,8 @@ void correctmfdflow(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy( data->fa, device->fa, fullsize * sizeof(double), cudaMemcpyDeviceToHost)) ;
   fprintf(data->outlog, "FA: FA memcopy operation 1 :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-  data->flatfile = "okgrid.txt";
-  write_int(data, data->flatmask, data->flatfile);
+  //data->flatfile = "okgrid.txt";
+  //write_int(data, data->flatmask, data->flatfile);
   //writeGRIDtoFile(data, "okgrid.tif", 1, 4); // this is the flatmask data
 
   double FA_max;
