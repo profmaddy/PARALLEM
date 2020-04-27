@@ -9,6 +9,7 @@
 //#include "Directions.h"
 //#include "production.h"
 #include "eroincidep.h"
+#include "mfd_accum.h"
 
 
 void erosionGPU( Data* data, Data* device, int iter);

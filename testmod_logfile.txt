@@ -1,0 +1,133 @@
+Landscape file   =  30mfam.asc
+Climate file     =  climateF.txt 
+Bedrock file   =  soilT.tif
+logfile: testmod_logfile.txt
+Max_iterations:1. 
+Summary file data in testmod_budgets.csv 
+Memory on CUDA card free at start of iteration: 6825216 total: 8388608
+climate file read 
+ncols 1542 
+nrows 2032 
+xllcorner 707862.875000 
+yllcorner 4467835.000000 
+cellsize 30.000000 
+nodata -9999.000000 
+Finished reading 30mfam.asc...
+Mask data sent to device no error
+Last climate data sent to device no error
+Error here? invalid argument
+Flow direction (fd and SFD) space on host allocated no error
+Flow accumulation space on host allocated no error
+All hosts matrices memory allocated no error
+All process grids now allocated and default values set 
+
+runoffweight: 1.000000 
+soilThickness: 0.240900 
+stone: 20.000000, fines: 80.000000 
+soilMoisture: 0.500000, nutrients: 10.000000, soilBio: 0.000000, TotalBio: 495.325879 
+Performing the simulation
+set device to zero :no error
+Allocated DEM and slope matrices on device :no error
+Memory on CUDA card free after device DEM and slope grids allocated: 6473792 total: 8388608 
+
+***********************
+Starting mode testmod Iteration 1 of 1
+***********************
+FD: setdevicespace0:no error
+FD: setdevicespace1:no error
+Memory on CUDA card free after FD space allocated: 5994112 total: 8388608 
+FD: setdevicespace2:no error
+FD: starting cuFlowDirection :no error
+FD: dev mem allocate shortest_path, fdmod, watershed_id :no error
+FD: memcopy dx, dy, dem, slopeptr, Slopes and prop :no error
+FD: fd and SFD to GPU :no error
+FD: first flow routing :no error
+FD: initial sinks :0 
+FD: initial flats :9453 
+Edge Flat and Sink count in catchment: 9453 of 1337310 cells in catchment
+Negative FD in catchment: 0 
+FD: return from shortest_paths_plateaus :no error
+FD: first shortest_path_plateaus_init :no error
+FD: first route_plateaus_init :no error
+FD: first route_plateaus_init :no error
+FD: first route_plateaus_init :no error
+FD: route plateaus :no error
+FD: Routed plateaus in 43 iterations. Now starting flooding driver... 
+FD: time to complete flow routing routine algorithm 0.138032 s
+FD: Memory on CUDA card free at end of routing: 5994112 total: 8388608
+FD: error after FD clear :no error
+FD: Memory on CUDA card free after FD space freed: 6080064 total: 8388608 
+
+FA: setdevicespace_FA:no error
+FA: calcrunoffweight:no error
+FA: Max RunOff: 0.488019,  Min RunOff: 0.483782, Ave Runoff: 0.485794 
+FA: runoff weights calculated :no error
+FA: FA memory allocation :no error
+FA: okGrid copy back :no error
+FA: FA memory allocation :no error
+FA: okGrid copy back :no error
+FA: FA memory allocation :no error
+FA: okGrid copy back :no error
+Number of actual cells not computed = 0
+FA: FA memcopy operation 0 :no error
+FA: FA memcopy operation 1 :no error
+FA: Maximum FA is  646264.933307 
+
+FA: Outletcell index is  30195 
+
+FA: Bad value count (i.e. not in catchment(s) = 0
+time to complete correctflowMFD algorithm -107374.176000 s
+
+FA: End of FA :invalid resource handle
+FA: Memory on CUDA card free after FA space freed: 5877632 total: 8388608 
+
+FA: cleardevicespace_FA:no error
+MOD: setdevicespace_Process :no error
+MOD: Matrix memcopy operations :no error
+MOD: Memory on CUDA card free after model matrix space allocated: 5571200 total: 8388608 
+MOD: Starting Model Process Routines 
+MOD: diff_erosion :no error
+total concentrated  from thrust is 1137.61308086 
+MOD: conc_erosion :no error
+total Incision from thrust is 344.86713614 
+FA_max before gelifluction 646264.933307 
+MOD: gelifluction :no error
+total gelifluction from thrust is 38573.76993600 
+MOD: sedmfd memory allocation :no error
+MOD:  loop :no error
+MOD: sedmfd memory allocation :no error
+MOD:  loop :no error
+MOD: sedmfd memory allocation :no error
+MOD:  loop :no error
+Number of actual cells not computed = 1851746
+total Dep from thrust is 36549.65260817 
+time to complete sediment accumulation algorithm 1.292211 s
+
+MOD: returned from sedmfdaccum :no error
+MOD: ero/inc/dep/slope memcopy :no error
+MOD: surface_change :no error
+wC scaler = 111111.111111 
+total wC from thrust is 12.7065075264994415960018159240 
+total wP from thrust is 2.97268907 
+MOD: weathering :no error
+MOD: fines/stone/soilT/soilM/weatherC and P memcopy back :no error
+MOD: update surface :no error
+MOD: update surface memcopy back :no error
+MOD: Min DEM ht : 467.219880 
+MOD: update_nutrient_content :no error
+MOD: conc_soilB/nutB copyback :no error
+MOD: grow vegetation :no error
+total TotBio from thrust is 1337310.00000000 
+MOD: mem copyback TotBn :no error
+MOD: time to complete flow accumulation 1.494505 s
+MOD: Memory on CUDA card free at end of erosion: 5571200 total: 8388608
+
+MOD: Memory on CUDA card free after model space freed: 6391872 total: 8388608 
+MOD: Clear matrix operations :invalid argument
+Ave erosion rate mm/a : 0.00269738 
+Memory on CUDA card free at end of iteration: 6391872 total: 8388608
+Finished Iteration 1
+Memory on CUDA card free after DEM and slope device grids space freed: 6440896 total: 8388608 
+Total simulation time of : 13.21000000000000085 
+
+All hosts matrices memory freed 

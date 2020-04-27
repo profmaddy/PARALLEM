@@ -214,3 +214,136 @@ void checkslopeandprop(Data* data)
     }
     printf("prop and slope check complete %d \n", counter);
 }
+
+__device__ double mfdsed(int client, int self, double* hv, int selffd, int gridCols)
+{
+    int do001, do002, do004, do008, do016, do032, do064, do128;
+    double slope;
+    double slopetotal;
+    double slope001, slope002, slope004, slope008, slope016, slope032, slope064, slope128;
+    double prop; // proportion
+    int targets;
+    double selfhv; //hv = height value
+    double thedistance;
+
+    thedistance = 1.0;
+    targets = 0;
+    slopetotal = 0.0;
+    selfhv = hv[self];
+
+    // filter ONLY the directions indicated in the MFD i.e. downslope directions and set 1 otherwise 0
+    do001 = (selffd & 1) != 0;
+    do002 = (selffd & 2) != 0;
+    do004 = (selffd & 4) != 0;
+    do008 = (selffd & 8) != 0;
+    do016 = (selffd & 16) != 0;
+    do032 = (selffd & 32) != 0;
+    do064 = (selffd & 64) != 0;
+    do128 = (selffd & 128) != 0;
+
+    // all slope values need to be positive for sum to proportion to work
+    slope001 = do001 * abs((double)selfhv - hv[self + 1]); // calculate the slopes
+    slope002 = do002 * abs((double)selfhv - hv[self + gridCols + 1]) / 1.41; // note the change in denominator for diagonals.
+    slope004 = do004 * abs((double)selfhv - hv[self + gridCols]);
+    slope008 = do008 * abs((double)selfhv - hv[self + gridCols - 1]) / 1.41;
+    slope016 = do016 * abs((double)selfhv - hv[self - 1]);
+    slope032 = do032 * abs((double)selfhv - hv[self - gridCols - 1]) / 1.41;
+    slope064 = do064 * abs((double)selfhv - hv[self - gridCols]);
+    slope128 = do128 * abs((double)selfhv - hv[self - gridCols + 1]) / 1.41;
+
+    if ((do001 == 1) && (slope001 == 0)) slope001 = 0.01;
+    if ((do002 == 1) && (slope002 == 0)) slope002 = 0.01;
+    if ((do004 == 1) && (slope004 == 0)) slope004 = 0.01;
+    if ((do008 == 1) && (slope008 == 0)) slope008 = 0.01;
+    if ((do016 == 1) && (slope016 == 0)) slope016 = 0.01;
+    if ((do032 == 1) && (slope032 == 0)) slope032 = 0.01;
+    if ((do064 == 1) && (slope064 == 0)) slope064 = 0.01;
+    if ((do128 == 1) && (slope128 == 0)) slope128 = 0.01;
+
+    slopetotal = (slope001 + slope004 + slope016 + slope064) + (slope002 + slope008 + slope032 + slope128);  //diagonals have already been divided by 1.4 see above
+
+    targets = do001 + do002 + do004 + do008 + do016 + do032 + do064 + do128;
+
+    if (do002 == 1 || do008 == 1 || do032 == 1 || do128 == 1) thedistance = 1.41;
+
+    // when pulling slope would be negative - need to make sure it is positive for proportions
+    slope = ((double)selfhv - hv[client]) / thedistance; // placed back in Aug 30th 17
+
+    //if ((slope<=0)|| (slope>6)) slope = 6;
+    if ((slope == 0)) slope = 0.01;
+
+    prop = 1.0 / targets; // default for SFD
+
+ /* if ( targets > 1)
+    {
+    prop = (double) (slope/(slopetotal));
+    } */
+
+    return prop;
+}
+__device__ double mfdsed(int client, int self, double* hv, int selffd, int gridCols)
+{
+    int do001, do002, do004, do008, do016, do032, do064, do128;
+    double slope;
+    double slopetotal;
+    double slope001, slope002, slope004, slope008, slope016, slope032, slope064, slope128;
+    double prop; // proportion
+    int targets;
+    double selfhv; //hv = height value
+    double thedistance;
+
+    thedistance = 1.0;
+    targets = 0;
+    slopetotal = 0.0;
+    selfhv = hv[self];
+
+    // filter ONLY the directions indicated in the MFD i.e. downslope directions and set 1 otherwise 0
+    do001 = (selffd & 1) != 0;
+    do002 = (selffd & 2) != 0;
+    do004 = (selffd & 4) != 0;
+    do008 = (selffd & 8) != 0;
+    do016 = (selffd & 16) != 0;
+    do032 = (selffd & 32) != 0;
+    do064 = (selffd & 64) != 0;
+    do128 = (selffd & 128) != 0;
+
+    // all slope values need to be positive for sum to proportion to work
+    slope001 = do001 * abs((double)selfhv - hv[self + 1]); // calculate the slopes
+    slope002 = do002 * abs((double)selfhv - hv[self + gridCols + 1]) / 1.41; // note the change in denominator for diagonals.
+    slope004 = do004 * abs((double)selfhv - hv[self + gridCols]);
+    slope008 = do008 * abs((double)selfhv - hv[self + gridCols - 1]) / 1.41;
+    slope016 = do016 * abs((double)selfhv - hv[self - 1]);
+    slope032 = do032 * abs((double)selfhv - hv[self - gridCols - 1]) / 1.41;
+    slope064 = do064 * abs((double)selfhv - hv[self - gridCols]);
+    slope128 = do128 * abs((double)selfhv - hv[self - gridCols + 1]) / 1.41;
+
+    if ((do001 == 1) && (slope001 == 0)) slope001 = 0.01;
+    if ((do002 == 1) && (slope002 == 0)) slope002 = 0.01;
+    if ((do004 == 1) && (slope004 == 0)) slope004 = 0.01;
+    if ((do008 == 1) && (slope008 == 0)) slope008 = 0.01;
+    if ((do016 == 1) && (slope016 == 0)) slope016 = 0.01;
+    if ((do032 == 1) && (slope032 == 0)) slope032 = 0.01;
+    if ((do064 == 1) && (slope064 == 0)) slope064 = 0.01;
+    if ((do128 == 1) && (slope128 == 0)) slope128 = 0.01;
+
+    slopetotal = (slope001 + slope004 + slope016 + slope064) + (slope002 + slope008 + slope032 + slope128);  //diagonals have already been divided by 1.4 see above
+
+    targets = do001 + do002 + do004 + do008 + do016 + do032 + do064 + do128;
+
+    if (do002 == 1 || do008 == 1 || do032 == 1 || do128 == 1) thedistance = 1.41;
+
+    // when pulling slope would be negative - need to make sure it is positive for proportions
+    slope = ((double)selfhv - hv[client]) / thedistance; // placed back in Aug 30th 17
+
+    //if ((slope<=0)|| (slope>6)) slope = 6;
+    if ((slope == 0)) slope = 0.01;
+
+    prop = 1.0 / targets; // default for SFD
+
+ /* if ( targets > 1)
+    {
+    prop = (double) (slope/(slopetotal));
+    } */
+
+    return prop;
+}

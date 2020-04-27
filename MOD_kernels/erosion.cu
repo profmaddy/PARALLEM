@@ -66,7 +66,8 @@ void erosionGPU(Data* data, Data* device, int iter)
 
 	checkCudaErrors( cudaMemcpy ( device->mask, data->mask, full_size * sizeof(int), cudaMemcpyHostToDevice) );
 
-	// sedmfdaccum(data, device);
+	sedmfdaccum(data, device);
+	
 	fprintf(data->outlog, "MOD: returned from sedmfdaccum :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 

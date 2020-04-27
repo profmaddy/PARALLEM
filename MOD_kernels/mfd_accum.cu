@@ -29,75 +29,7 @@ __device__ int inghbr(int client, int nghbr, int gridCols)
     }
 }
 
-__device__ double mfdsed(int client, int self, double *hv, int selffd, int gridCols)
-{
-    int do001, do002, do004, do008, do016, do032, do064, do128;
-    double slope;
-    double slopetotal;
-    double slope001, slope002, slope004, slope008, slope016, slope032, slope064, slope128;
-    double prop; // proportion
-    int targets;
-    double selfhv; //hv = height value
-	double thedistance;
-
-	thedistance = 1.0;
-    targets = 0;
-    slopetotal = 0.0;
-    selfhv = hv[self];
-
-    // filter ONLY the directions indicated in the MFD i.e. downslope directions and set 1 otherwise 0
-	do001 = (selffd &   1) != 0;
-    do002 = (selffd &   2) != 0;
-    do004 = (selffd &   4) != 0;
-    do008 = (selffd &   8) != 0;
-    do016 = (selffd &  16) != 0;
-    do032 = (selffd &  32) != 0;
-    do064 = (selffd &  64) != 0;
-    do128 = (selffd & 128) != 0;
-
-    // all slope values need to be positive for sum to proportion to work
-    slope001 = do001 * abs((double) selfhv - hv[self            + 1]) ; // calculate the slopes
-    slope002 = do002 * abs((double) selfhv - hv[self + gridCols + 1])  / 1.41 ; // note the change in denominator for diagonals.
-    slope004 = do004 * abs((double) selfhv - hv[self + gridCols    ]);
-    slope008 = do008 * abs((double) selfhv - hv[self + gridCols - 1])  / 1.41;
-    slope016 = do016 * abs((double) selfhv - hv[self            - 1]);
-    slope032 = do032 * abs((double) selfhv - hv[self - gridCols - 1])  / 1.41;
-    slope064 = do064 * abs((double) selfhv - hv[self - gridCols    ]);
-    slope128 = do128 * abs((double) selfhv - hv[self - gridCols + 1])  / 1.41;
-
-        if ( (do001 == 1) &&  (slope001 == 0)  ) slope001= 0.01;
-        if ( (do002 == 1) &&  (slope002 == 0)  ) slope002= 0.01;
-        if ( (do004 == 1) &&  (slope004 == 0)  ) slope004= 0.01;
-        if ( (do008 == 1) &&  (slope008 == 0)  ) slope008= 0.01;
-        if ( (do016 == 1) &&  (slope016 == 0)  ) slope016= 0.01;
-        if ( (do032 == 1) &&  (slope032 == 0)  ) slope032= 0.01;
-        if ( (do064 == 1) &&  (slope064 == 0)  ) slope064= 0.01;
-        if ( (do128 == 1) &&  (slope128 == 0)  ) slope128= 0.01;
-
-    slopetotal = ( slope001 + slope004 + slope016 + slope064 ) + (slope002 + slope008 + slope032 + slope128) ;  //diagonals have already been divided by 1.4 see above
-
-    targets    =    do001 +    do002 +    do004 +    do008 +    do016 +    do032 +    do064 +    do128;
-
-	if ( do002 == 1 || do008 == 1 || do032 ==1 || do128 == 1) thedistance = 1.41;
-
-    // when pulling slope would be negative - need to make sure it is positive for proportions
-    slope = ((double) selfhv - hv[client]) / thedistance  ; // placed back in Aug 30th 17
-
-    //if ((slope<=0)|| (slope>6)) slope = 6;
-    if ((slope==0)) slope = 0.01;
-
-	prop = 1.0  / targets; // default for SFD
-
- /* if ( targets > 1)
-  	{
-  	prop = (double) (slope/(slopetotal));
-   	} */
-
-	return prop ;
-}
-
-
-__global__ void MFDsedbud(int *mask, double *hv, int *fd, double *diffuse, double *conc, double *geli,  double *depo, int *ok,
+__global__ void MFDsedbud(int *mask, double *hv, int *fd, double* props, double *diffuse, double *conc, double *geli,  double *depo, int *ok,
 						  unsigned int *progressd2,  int* localOK, double ddk, double dck, double dgk,
 						  double * finesPtr, double *stonePtr, double *nutPtr, double *soilTPtr , int gridCols, int gridRows)
 {
@@ -109,11 +41,9 @@ __global__ void MFDsedbud(int *mask, double *hv, int *fd, double *diffuse, doubl
 	    return;
       if(icol == 0 || irow == 0 ) return; // if outside of DEM nothing to do
 
-
 	int self;
     self = irow * gridCols + icol;
 	if (mask[self] == 0) return;
-
 
     double accum_d, accum_c, accum_g;
 	unsigned int theval = 99999999;
@@ -126,16 +56,14 @@ __global__ void MFDsedbud(int *mask, double *hv, int *fd, double *diffuse, doubl
     double ncnw_from, ncnw_nutfrom;
     double ncn_from, ncn_nutfrom;
     double ncne_from, ncne_nutfrom;
-
     double  fromEprop,  fromSEprop,  fromSprop,  fromSWprop,  fromWprop , fromNWprop ,  fromNprop ,  fromNEprop;
-
     int cnfd;
+    int proploc;
+    
     accum_d = 0.0;
     accum_c = 0.0;
     accum_g = 0.0;
-
-    fromEprop = fromSEprop = fromSprop = fromSWprop =  fromWprop = fromNWprop =  fromNprop =  fromNEprop = 0.0;
-
+        
     nce_from = nce_nutfrom = 0.0;
     ncse_from = ncse_nutfrom =  0.0;
     ncs_from = ncs_nutfrom = 0.0;
@@ -162,114 +90,141 @@ __global__ void MFDsedbud(int *mask, double *hv, int *fd, double *diffuse, doubl
     nine = inghbr(self, NORTHEAST, gridCols);
 
     /* ---- */
-
-    cnfd = fd[nie];  // cnfd is current flow direction
+    cnfd = fd[nie];  // cnfd is current flow direction of contributing cell to east
+    
     if (cnfd & WEST)
     {
         if (!ok[nie]) return;
-        else {
-              fromEprop =  mfdsed(self, nie, hv, cnfd, gridCols);
-              accum_d  += fromEprop  * (diffuse[nie] * (1-ddk));
-		      accum_c  += fromEprop  * (conc[nie]    * (1-dck)) ;
-		      accum_g  += fromEprop  * (geli[nie]    * (1-dgk));
-		      nce_from       =  fromEprop  * stonePtr[nie] ;
-		      nce_nutfrom    =  fromEprop  * nutPtr[nie] ;
-        }
+            /* if (!ok[nie]) return;
+            proploc = (nie * 8) + 6;// flowing west
+            addhere = fa[nie] * props[proploc];
+            accum += addhere;*/
+                proploc = (nie * 8) + 6;// flowing west
+                accum_d  += props[proploc]  * (diffuse[nie] * (1-ddk));
+		        accum_c  += props[proploc] * (conc[nie]    * (1-dck)) ;
+		        accum_g  += props[proploc] * (geli[nie]    * (1-dgk));
+		        nce_from       = props[proploc] * stonePtr[nie] ;
+		        nce_nutfrom    = props[proploc] * nutPtr[nie] ;
     }
 
     cnfd = fd[nise];
+    
     if (cnfd & NORTHWEST)
     {
         if (!ok[nise]) return;
-        	fromSEprop = mfdsed(self, nise, hv, cnfd, gridCols);
-        	accum_d  += fromSEprop  * (diffuse[nise] * (1-ddk));
-        	accum_c  += fromSEprop  * (conc[nise]     * (1-dck)) ;
-        	accum_g  +=  fromSEprop  * (geli[nise]       * (1-dgk));
-        	ncse_from       =  fromSEprop  * stonePtr[nise] ;
-        	ncse_nutfrom    =  fromSEprop  * nutPtr[nise] ;
+            /*if (!ok[nise]) return;
+            proploc = (nise * 8) + 7;// flowing northwest
+            addhere = fa[nise] * props[proploc];
+            accum += addhere;*/
+                proploc = (nise * 8) + 7;// flowing northwest
+        	    accum_d  += props[proploc] * (diffuse[nise] * (1-ddk));
+        	    accum_c  += props[proploc] * (conc[nise]     * (1-dck)) ;
+        	    accum_g  += props[proploc] * (geli[nise]       * (1-dgk));
+        	    ncse_from       = props[proploc] * stonePtr[nise] ;
+        	    ncse_nutfrom    = props[proploc] * nutPtr[nise] ;
     }
 
     cnfd = fd[nis];
     if (cnfd & NORTH)
     {
         if (!ok[nis]) return;
-            fromSprop =  mfdsed(self, nis, hv, cnfd, gridCols);
-        	accum_d  +=  fromSprop  * (diffuse[nis] * (1-ddk));
-        	accum_c  +=  fromSprop  * (conc[nis]    * (1-dck)) ;
-        	accum_g  +=  fromSprop  * (geli[nis]      * (1-dgk));
-        	ncs_from       =  fromSprop  * stonePtr[nis] ;
-        	ncs_nutfrom    =  fromSprop  * nutPtr[nis] ;
+        /*if (!ok[nis]) return;
+        proploc = (nis * 8) + 0;//flowing north
+        addhere = fa[nis] * props[proploc];
+        accum += addhere;*/
+                proploc = (nis * 8) + 0;//flowing north
+        	    accum_d  += props[proploc] * (diffuse[nis] * (1-ddk));
+        	    accum_c  += props[proploc] * (conc[nis]    * (1-dck)) ;
+        	    accum_g  += props[proploc] * (geli[nis]      * (1-dgk));
+        	    ncs_from       = props[proploc] * stonePtr[nis] ;
+        	    ncs_nutfrom    = props[proploc] * nutPtr[nis] ;
     }
 
     cnfd = fd[nisw];
     if (cnfd & NORTHEAST)
     {
         if (!ok[nisw]) return;
-          fromSWprop = mfdsed(self, nisw, hv, cnfd, gridCols);
-          accum_d  +=  fromSWprop  *  (diffuse[nisw] * (1-ddk));
-          accum_c  += fromSWprop  * (conc[nisw]     * (1-dck)) ;
-          accum_g  +=  fromSWprop  * (geli[nisw]       * (1-dgk));
-	      ncsw_from       =  fromSWprop  * stonePtr[nisw] ;
-	      ncsw_nutfrom    =  fromSWprop  * nutPtr[nisw] ;
+        /*if (!ok[nisw]) return;
+        proploc = (nisw * 8) + 1;//flowing northeast
+        addhere = fa[nisw] * props[proploc];
+        accum += addhere;*/
+                proploc = (nisw * 8) + 1;//flowing northeast
+                accum_d  += props[proploc] *  (diffuse[nisw] * (1-ddk));
+                accum_c  += props[proploc] * (conc[nisw]     * (1-dck)) ;
+                accum_g  += props[proploc] * (geli[nisw]       * (1-dgk));
+	            ncsw_from       = props[proploc] * stonePtr[nisw] ;
+	            ncsw_nutfrom    = props[proploc] * nutPtr[nisw] ;
     }
 
     cnfd = fd[niw];
     if (cnfd & EAST)
     {
         if (!ok[niw]) return;
-        	fromWprop =  mfdsed(self, niw, hv, cnfd, gridCols);
-        	accum_d  +=  fromWprop  * (diffuse[niw] * (1-ddk));
-        	accum_c  += fromWprop  * (conc[niw]     * (1-dck)) ;
-        	accum_g  +=  fromWprop  * (geli[niw]       * (1-dgk));
-        	ncw_from       =  fromWprop  * stonePtr[niw] ;
-        	ncw_nutfrom    =  fromWprop  * nutPtr[niw] ;
+        /*if (!ok[niw]) return;
+        proploc = (niw * 8) + 2; // flowing east
+        addhere = fa[niw] * props[proploc];
+        accum += addhere;*/
+                proploc = (niw * 8) + 2; // flowing east
+                accum_d  += props[proploc] * (diffuse[niw] * (1-ddk));
+                accum_c  += props[proploc] * (conc[niw]     * (1-dck)) ;
+                accum_g  += props[proploc] * (geli[niw]       * (1-dgk));
+                ncw_from       = props[proploc] * stonePtr[niw] ;
+                ncw_nutfrom    = props[proploc] * nutPtr[niw] ;
     }
 
     cnfd = fd[ninw];
     if (cnfd & SOUTHEAST)
     {
         if (!ok[ninw]) return;
-        	fromNWprop = mfdsed(self, ninw, hv, cnfd, gridCols);
-        	accum_d  +=  fromNWprop  * (diffuse[ninw] * (1-ddk));
-        	accum_c  += fromNWprop  * (conc[ninw]     * (1-dck)) ;
-        	accum_g  +=  fromNWprop  * (geli[ninw]       * (1-dgk));
-        	ncnw_from       =  fromNWprop  * stonePtr[ninw] ;
-        	ncnw_nutfrom    =  fromNWprop  * nutPtr[ninw] ;
+        /*if (!ok[ninw]) return;
+        proploc = (ninw * 8) + 3;//flowing southeast
+        addhere = fa[ninw] * props[proploc];
+        accum += addhere;*/
+                proploc = (ninw * 8) + 3;//flowing southeast
+        	    accum_d  += props[proploc] * (diffuse[ninw] * (1-ddk));
+        	    accum_c  += props[proploc] * (conc[ninw]     * (1-dck)) ;
+        	    accum_g  += props[proploc] * (geli[ninw]       * (1-dgk));
+        	    ncnw_from       = props[proploc] * stonePtr[ninw] ;
+        	    ncnw_nutfrom    = props[proploc] * nutPtr[ninw] ;
     }
 
     cnfd = fd[nin];
     if (cnfd & SOUTH)
     {
         if (!ok[nin]) return;
-        	fromNprop =  mfdsed(self, nin, hv, cnfd, gridCols);
-        	accum_d  +=  fromNprop  * (diffuse[nin] * (1-ddk));
-        	accum_c  += fromNprop  * (conc[nin]     * (1-dck)) ;
-        	accum_g  +=  fromNprop  * (geli[nin]       * (1-dgk));
-        	ncn_from       =  fromNprop  * stonePtr[nin] ;
-        	ncn_nutfrom    =  fromNprop  * nutPtr[nin] ;
+        /*if (!ok[nin]) return;
+        proploc = (nin * 8) + 4;//flowing south
+        addhere = fa[nin] * props[proploc];
+        accum += addhere;*/
+                proploc = (nin * 8) + 4;//flowing south
+        	    accum_d  += props[proploc] * (diffuse[nin] * (1-ddk));
+        	    accum_c  += props[proploc] * (conc[nin]     * (1-dck)) ;
+        	    accum_g  += props[proploc] * (geli[nin]       * (1-dgk));
+        	    ncn_from       = props[proploc] * stonePtr[nin] ;
+        	    ncn_nutfrom    = props[proploc] * nutPtr[nin] ;
     }
 
     cnfd = fd[nine];
     if (cnfd & SOUTHWEST)
     {
         if (!ok[nine]) return;
-        	fromNEprop = mfdsed(self, nine, hv, cnfd, gridCols);
-        	accum_d  +=  fromNEprop  * (diffuse[nine] * (1-ddk));
-        	accum_c  += fromNEprop  * (conc[nine]     * (1-dck)) ;
-        	accum_g  +=  fromNEprop  * (geli[nine]       * (1-dgk));
-        	ncne_from       =  fromNEprop  * stonePtr[nine] ;
-        	ncne_nutfrom    =  fromNEprop  * nutPtr[nine] ;
+       /* if (!ok[nine]) return;
+        proploc = (nine * 8) + 5;//flowing southwest
+        addhere = fa[nine] * props[proploc];
+        accum += addhere;*/
+                proploc = (nine * 8) + 5;//flowing southwest
+        	    accum_d  += props[proploc] * (diffuse[nine] * (1-ddk));
+        	    accum_c  += props[proploc] * (conc[nine]     * (1-dck)) ;
+        	    accum_g  += props[proploc] * (geli[nine]       * (1-dgk));
+        	    ncne_from       = props[proploc] * stonePtr[nine] ;
+        	    ncne_nutfrom    = props[proploc] * nutPtr[nine] ;
     }
 
     depo[self] =  ((accum_d + diffuse[self])* ddk) + ((accum_c + conc[self]) * dck) + ((accum_g + geli[self]) * dgk);
 
     // replace original deposit routine to calculate new proportions of fines, stones and nutrients
 
-
     double sedthick = (soilTPtr[self]) + (depo[self]) ;
-
-
-
 	if (sedthick != 0.0)
 	{
 		double old = (soilTPtr[self]) / sedthick ;
@@ -290,8 +245,6 @@ __global__ void MFDsedbud(int *mask, double *hv, int *fd, double *diffuse, doubl
 
 		//nutPtr[self] =   (old * (nutPtr[self]))   + (input * propNutfrom) ;
 	}
-
-
 	double toterosion = diffuse[self]+conc[self]+geli[self];
 	if (toterosion >= sedthick) soilTPtr[self]= 0.0;
 	if (sedthick > toterosion) soilTPtr[self] = sedthick - toterosion;
@@ -347,8 +300,8 @@ int processtheGrid(Data* data, Data* device, int loopMax, int percent, int gridR
 //	        		MFDsedbud(double *hv, int *fd, double *diffuse, double *conc, double *geli,  int *ok, unsigned int *progressd,  int* localOK,
 // 						double ddk, double dck, double dgk, double * finesPtr, double *stonePtr, double *nutPtr, double *soilTPtr , int gridCols)
 
-	        		MFDsedbud<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->fd, device->eroPtr, device->inciPtr, device->geliPtr, device->depoPtr,  ok, progressd2, localOK_d,
-	        				                                                                                  ddk, dck, dgk, device->finesPtr, device->stonePtr, device->nutPtr, device->soilTPtr, gridColumns, gridRows);
+	        		MFDsedbud<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->fd, device->prop, device->eroPtr, device->inciPtr, device->geliPtr, device->depoPtr,  ok, progressd2, localOK_d,
+	        				                                                    ddk, dck, dgk, device->finesPtr, device->stonePtr, device->nutPtr, device->soilTPtr, gridColumns, gridRows);
 
 	        		//fprintf(data->outlog, "MOD: MFDsedbud rtn :%s\n", cudaGetErrorString(cudaGetLastError()));
 	        		//printf("MOD: MFDsedbud rtn :%s\n", cudaGetErrorString(cudaGetLastError()));
