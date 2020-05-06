@@ -11,6 +11,61 @@
 #include <iostream>
 #include "io.h"
 
+void fillthesinks(Data* data) 
+{
+	int ncell_y = data->mapInfo.height;
+	int ncell_x = data->mapInfo.width;
+	int self;
+	int cellx, celly, dcell;
+	int upslope, downslope,flatcount, sinkcounter;
+	double lowest;
+	double thiscellht, targetcellht;
+	int xmove[9] = { 0,1,1,1,0,-1,-1,-1,0 };
+	int ymove[9] = { -1,-1,0,1,1,1,0,-1,0 };
+	int* dx;
+	int* dy;
+	dx = &xmove[0];
+	dy = &ymove[0];
+	data->dx = dx;
+	data->dy = dy;
+	sinkcounter = 0;
+	
+	for (int irow = 0; irow < ncell_y; irow++)  //irow loop
+	{
+		for (int icol = 0; icol < ncell_x; icol++) //icol loop
+		{
+			self = irow * ncell_x + icol;
+			if (data->mask[self] == 1) // in catchment
+			{
+				lowest = 2000;
+				upslope = 0;
+				downslope = 0;
+				flatcount = 0;
+				for (dcell = 0; dcell < 8; dcell++)
+				{
+					cellx = icol + data->dx[dcell];
+					celly = irow + data->dy[dcell];
+					targetcellht = data->dem[celly * ncell_x + cellx];
+					if (targetcellht != -9999) // dont look outside the grid
+					{
+						if ((data->dem[self]) < targetcellht) upslope++;
+						if ((data->dem[self]) > targetcellht) downslope++;
+						if ((data->dem[self]) == targetcellht) flatcount++;
+						if (targetcellht < lowest) lowest = targetcellht; // find the lowest neighbour
+					}
+				}
+				if  (upslope > 7) {
+					data->dem[self] = lowest; // +0.00000001; // fill the sink to level of lowest neighbour and create a slope
+					sinkcounter++;
+				}
+			}
+		}
+	}
+	data->dem[data->outletcellidx] = data->dem[data->outletcellidx] - 0.00012;
+	printf("number of sinks filled %d \n", sinkcounter);
+	write_double(data, data->dem, "filleddem.asc");
+}
+
 void erosionGPU(Data* data, Data* device, int iter)
 {
 	int ncell_x = data->mapInfo.width;
@@ -59,17 +114,14 @@ void erosionGPU(Data* data, Data* device, int iter)
 		fprintf(data->outlog, "total gelifluction from thrust is %10.8lf \n", data->totG);
 		printf("total gelifluction from thrust is %10.8lf \n", data->totG);
 	
-
 	fflush(data->outlog);
-
-	//calc_sedflux(data, device);
 
 	checkCudaErrors( cudaMemcpy ( device->mask, data->mask, full_size * sizeof(int), cudaMemcpyHostToDevice) );
 
 	sedmfdaccum(data, device);
+	//write_double(data, data->depoPtr, "depo.txt");
 	
 	fprintf(data->outlog, "MOD: returned from sedmfdaccum :%s\n", cudaGetErrorString(cudaGetLastError()));
-
 
 	checkCudaErrors( cudaMemcpy ( data->geliPtr,  device->geliPtr,  full_size * sizeof(double), cudaMemcpyDeviceToHost) );
 
@@ -110,6 +162,10 @@ void erosionGPU(Data* data, Data* device, int iter)
 
 	checkCudaErrors( cudaMemcpy( data->TotBPtr,  device->TotBPtr,  full_size * sizeof(double), cudaMemcpyDeviceToHost) );
 	fprintf(data->outlog, "MOD: mem copyback TotBn :%s\n", cudaGetErrorString(cudaGetLastError()));
+
+	checkCudaErrors(cudaMemcpy(data->dem, device->dem, full_size * sizeof(double), cudaMemcpyDeviceToHost));
+	//fillthesinks(data); // use this until flooding is working
+	checkCudaErrors(cudaMemcpy(device->dem, data->dem, full_size * sizeof(double), cudaMemcpyHostToDevice));
 
 	cudaEventRecord(stop,0);
 	cudaEventSynchronize(stop);

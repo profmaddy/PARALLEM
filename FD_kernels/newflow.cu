@@ -131,19 +131,19 @@ __global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, i
 				  {
 					  smax = stemp;
 					  aspectsfd = newaspect;
-					  if (aspectsfd == 0) return;
+					  //if (aspectsfd == 0) return;
 				  }
 
 			  aspect = aspect + newaspect; // for MFD
-			  if (aspect == 0) return;
+			  //if (aspect == 0) return;
 
 		  }
 		  if (thiscellht < targetcellht) upslopecount += 1 ;
 
 		  if (thiscellht == targetcellht)  {
 			  flatcount += 1;
-	  	  	  aspectF = newaspect;
-	  	  	  aspectsfdF = newaspect;
+	  	  	  aspectF = 0;
+	  	  	  aspectsfdF = 0;
 		  }
 
 		  }
@@ -324,13 +324,13 @@ __global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double 
 			}
 			dis = shortest_paths[celly * ncell_x + cellx] + dc;
 
-			//if (zs[self] == zs[celly * ncell_x + cellx] && min_distance > dis) // if I am a flat
+			if (zs[self] == zs[celly * ncell_x + cellx] && min_distance > dis) // if I am a flat
 
               
             // the following is taken from Shuns dissertation
-            if ((((zs[self] == zs[celly * ncell_x + cellx]) ||
-                zs[self] - zs[celly * ncell_x + cellx] < 0.000001 && zs[self] > zs[celly * ncell_x + cellx]) || (zs[self] - zs[celly * ncell_x + cellx] > -0.000001 &&
-                    zs[self] < zs[celly * ncell_x + cellx])) && min_distance > dis)
+            //if ((((zs[self] == zs[celly * ncell_x + cellx]) ||
+                //zs[self] - zs[celly * ncell_x + cellx] < 0.000001 && zs[self] > zs[celly * ncell_x + cellx]) || (zs[self] - zs[celly * ncell_x + cellx] > -0.000001 &&
+                  //  zs[self] < zs[celly * ncell_x + cellx])) && min_distance > dis)
 
 
 
@@ -354,7 +354,8 @@ __global__ void init_watershedMFD(int *mask, int *SFD, int *watershed_id, double
   irow = blockIdx.y * blockDim.y + threadIdx.y;
   icol = blockIdx.x * blockDim.x + threadIdx.x;
 
-  if(icol >= ncell_x || irow >= ncell_y) // if outside of DEM nothing to do
+  //if(icol >= ncell_x || irow >= ncell_y) // if outside of DEM nothing to do
+      if (irow >= ncell_y) // if outside of DEM nothing to do
     return;
 
   int self = irow * ncell_x + icol;
@@ -365,7 +366,8 @@ __global__ void init_watershedMFD(int *mask, int *SFD, int *watershed_id, double
   }
 
   //watershed_id[this_idx] = -1;
-  if((icol == 0) || (icol == ncell_x - 1) || (irow == 0) || (irow == ncell_y - 1)) // if we're on the outside of the DEM use a special watershed (ncell_x*ncell_y)
+  //if((icol == 0) || (icol == ncell_x - 1) || (irow == 0) || (irow == ncell_y - 1)) // if we're on the outside of the DEM use a special watershed (ncell_x*ncell_y)
+  if ((icol == ncell_x - 1) || (irow == 0) || (irow == ncell_y - 1)) // if we're on the outside of the DEM use a special watershed (ncell_x*ncell_y)
   {
     watershed_id[self] = 0;
 	return;
@@ -389,17 +391,18 @@ __global__ void init_watershedMFD(int *mask, int *SFD, int *watershed_id, double
 	 // int dir = ((int) log2(SFD[self]) + 2) % 8;
 
 	  int dir = SFD[self];
-	  if (dir == 64)  dir = 0;
-	  if (dir == 128) dir = 1;
-	  if (dir == 1)   dir = 2;
-	  if (dir == 2)   dir = 3;
-	  if (dir == 4)   dir = 4;
-	  if (dir == 8)   dir = 5;
-	  if (dir == 16)  dir = 6;
-	  if (dir == 32)  dir = 7;
+      int newdir;
+	  if (dir == 64)  newdir = 0;
+	  if (dir == 128) newdir = 1;
+	  if (dir == 1)   newdir = 2;
+	  if (dir == 2)   newdir = 3;
+	  if (dir == 4)   newdir = 4;
+	  if (dir == 8)   newdir = 5;
+	  if (dir == 16)  newdir = 6;
+	  if (dir == 32)  newdir = 7;
 
-	int cellx = icol + dx[dir];
-    int celly = irow + dy[dir];
+	int cellx = icol + dx[newdir];
+    int celly = irow + dy[newdir];
     // check we are still in the DEM
 #ifndef PRODUCTION_RUN
     if (cellx < 0 || cellx >= ncell_x || celly < 0 || celly >= ncell_y) {
@@ -427,13 +430,12 @@ __global__ void init_watershed_sinkMFD(int *mask, int *SFD, int *watershed_id, d
   int irow, icol;
   irow = blockIdx.y * blockDim.y + threadIdx.y;
   icol = blockIdx.x * blockDim.x + threadIdx.x;
-  if(icol >= ncell_x || irow >= ncell_y) // Outside DEM - return as no work to do...
+  //if(icol >= ncell_x || irow >= ncell_y) // Outside DEM - return as no work to do...
+      if (irow >= ncell_y) // Outside DEM - return as no work to do...
     return;
 
 	int self = irow * ncell_x + icol;
 	if (mask[self] != 1) return; // don't calculate if not in catchment(s) of interest
-
-	__syncthreads();
 
   if(SFD[self] == 0) { // if we're part of a flat - now coded for MFD
     int w_id = -1;
@@ -471,22 +473,32 @@ __global__ void identify_watershedMFD(int *mask, int *SFD, int *watershed_id, in
 
 	int self = irow * ncell_x + icol;
 	if (mask[self] != 1) return; // don't calculate if not in catchment(s) of interest
-
-	__syncthreads();
-  //int this_idx = irow * ncell_x + icol;
-  if(watershed_id[self] < 0) // if I don't have a watershed value yet...
-  { // point to the cell that the cell I'm pointing at points to
-    // each watershed is shifted down by 1 to deal with 0 - which could be a watershed
-    watershed_id[self] = watershed_id[-watershed_id[self]-1];
-//#ifndef PRODUCTION_RUN
-    if (watershed_id[self] > 10000) {
-    	printf("Watershed value too large in pointer jump %d\n", watershed_id[self]);
+    if (watershed_id[self] < 0)
+    {
+        //watershed_id[self] = watershed_id[-watershed_id[self] - 1];
+        watershed_id[self] = watershed_id[watershed_id[self] - 1] * -1;;
+        *changed = 1;
     }
-//#endif
 
-    // this will either be a watershed value or a pointer to another cell (closer to the watershed)
-    *changed = 1; // something updated so need to go around again
-  }
+    
+    // point to the cell that the cell I'm pointing at points to
+    // each watershed is shifted down by 1 to deal with 0 - which could be a watershed
+    // this will either be a watershed value or a pointer to another cell (closer to the watershed) 
+    //if (watershed_id[self] < 0) 
+
+   /* int watershed;
+    watershed = watershed_id[(watershed_id[self] * -1)];
+    watershed = watershed + 1;
+
+    if ( watershed > 0) // I am looking at a sink or a cell that points to this sink
+    {
+        watershed_id[self] = watershed ;
+        *changed = 1;
+        //if (watershed_id[self] > 10000) {
+        //    printf("Watershed value too large in pointer jump %d\n", watershed_id[self]);
+        //}
+*/
+   // } // something updated so need to go around again
 }
 
 
@@ -572,9 +584,11 @@ __global__ void comp_shortest_paths_sinkMFD(int *mask, double *zs, int *aspects,
                     //are diagonals
 			}
 			dis = shortest_paths[celly * ncell_x + cellx] + dc;
-			if((((this_ele == zs[celly * ncell_x + cellx]) ||
-			  this_ele - zs[celly * ncell_x + cellx] < 0.000001 && this_ele > zs[celly * ncell_x + cellx]) || (this_ele - zs[celly * ncell_x + cellx] > -0.000001 &&
-				this_ele < zs[celly * ncell_x + cellx])) && min_distance > dis)
+
+            if (zs[this_ele] == zs[celly * ncell_x + cellx] && min_distance > dis) // if I am a flat
+			//if((((this_ele == zs[celly * ncell_x + cellx]) ||
+			  //this_ele - zs[celly * ncell_x + cellx] < 0.000001 && this_ele > zs[celly * ncell_x + cellx]) || (this_ele - zs[celly * ncell_x + cellx] > -0.000001 &&
+				//this_ele < zs[celly * ncell_x + cellx])) && min_distance > dis)
 				// Q: again - can this be replaced with:
 				// if (abs(this_ele - zs[celly * ncell_x + cellx) < 0.000001 && min_distance > dis)
 			{

@@ -38,6 +38,7 @@ typedef struct DataS {
 	double rescale;
 
 	int* fd;
+	int* prevfd;
 	int* SFD;
 	int* fdmod;
 	double* fa;

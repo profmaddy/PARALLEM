@@ -77,7 +77,7 @@ __global__ void init_watershed_sinkMFD(int *mask, int *SFD, int *watershed_id, d
 
 __device__ double atomicMin(double* address, double val);
 
-__global__ void final_watershedMFD(int *mask, int *aspects, int *watershed_id, double *zs, float *shortest_paths, int *dx, int *dy, int *counter, int ncell_x, int ncell_y);
+//__global__ void final_watershedMFD(int *mask, int *aspects, int *watershed_id, double *zs, float *shortest_paths, int *dx, int *dy, int *counter, int ncell_x, int ncell_y);
 
 __global__ void identify_watershedMFD(int *mask, int *aspects, int *watershed_id, int *dx, int *dy, int ncell_x, int ncell_y, int *changed);
 

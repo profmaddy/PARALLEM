@@ -129,8 +129,13 @@ void setdevicespace_FA(Data* data, Data* device)
 
 void cleardevicespace_FA(Data* data, Data* device)
 {
-	size_t freenow, total;
+	int full_size;
+	int ncell_x = data->mapInfo.width;
+	int ncell_y = data->mapInfo.height;
+	full_size = ncell_x * ncell_y;
 
+	size_t freenow, total;
+	checkCudaErrors(cudaMemcpy(data->prevfd, device->fd, full_size * sizeof(int), cudaMemcpyDeviceToHost));
 	cudaFree(device->fd);
 	cudaFree(device->runoffweight);
 	cudaFree(device->fa);
@@ -237,6 +242,7 @@ void cleardevicespace_Process(Data* data, Data* device)
 	cudaMemGetInfo(&freenow, &total);
 	fprintf(data->outlog, "MOD: Memory on CUDA card free after model space freed: %zd total: %zd \n",freenow/1024,total/1024);
 	fprintf(data->outlog, "MOD: Clear matrix operations :%s\n", cudaGetErrorString(cudaGetLastError()));
+
 }
 
 int copyMask(Data* data, Data* device)

@@ -49,7 +49,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\darre\source\repos\PARALLEM2020;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\darre\source\repos\PARALLEM2020\FA_kernels;C:\Users\darre\source\repos\PARALLEM2020\FD_kernels;C:\Users\darre\source\repos\PARALLEM2020\headers;C:\Users\darre\source\repos\PARALLEM2020\MEM_kernels;C:\Users\darre\source\repos\PARALLEM2020\MOD_kernels;C:\Users\darre\source\repos\PARALLEM2020;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>

@@ -1,6 +1,8 @@
 
 #include "Data.h"
 #include <sys/types.h>
+#include "io.h"
+
 
 #include <cuda.h>
 #include "cuda_runtime.h"
@@ -33,21 +35,33 @@ int setClimate(Data* data, int iteration)
 
 
 
-int init_setoutletcell(Data* data) {
+int init_setoutletcell(Data* data) 
+{
  double lowest ;
   lowest = 1000.;
   int cell;
+  int index;
+  index = 0;
 
   // what if the lowest cell is currently in the grid!
-  for (int i = 0; i < data->mapInfo.height; i++){
-		for (int j = 0; j < data->mapInfo.width; j++) {
-			cell = 	i*data->mapInfo.width + j;
-			if  ( ( (data->dem[cell]) < lowest) && ((data->dem[cell]) > 0) ) { //make sure it is inside the grid
-				lowest = data->dem[cell] ;
-				data->outletcellidx = cell;
-			}
+  for (int i = 0; i < data->mapInfo.height; i++)
+  {
+	  for (int j = 0; j < data->mapInfo.width; j++)
+	  {
+		  cell = i * data->mapInfo.width + j;
+		  if (data->mask[cell] == 1) // I am in the catchment
+		  {
+			  if ((data->dem[cell]) < lowest) {
+				  lowest = data->dem[cell];
+				  index = cell;
 			  }
-		}
+		  }
+	  }
+  }
+  data->outletcellidx = index;
+  printf("identified outlet cell has index %d and value %f \n", index, data->dem[data->outletcellidx]);
+  fprintf(data->outlog, "identified outlet cell has index %d and value %f \n", index, data->dem[data->outletcellidx]);
+
   return(0);
 }
 
@@ -189,6 +203,9 @@ int setProcessMatrices(Data* data)
 
   fprintf(data->outlog,"runoffweight: %f \nsoilThickness: %f \nstone%: %f, fines%: %f \nsoilMoisture: %f, nutrients: %f, soilBio: %f, TotalBio: %f \n",
 		               data->runoffweight[fdp], data->soilTPtr[fdp], data->stonePtr[fdp], data->finesPtr[fdp], data->soilMPtr[fdp], data->nutPtr[fdp], data->soilBPtr[fdp], data->TotBPtr[fdp]);
+
+  //write_double(data, data->TotBPtr, "bio.txt");
+
 
   return 0;
 }

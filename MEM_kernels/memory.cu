@@ -91,6 +91,8 @@ int createProcessMatrices(Data* data)
 
   checkCudaErrors(cudaMallocHost((void **)&data->fd, dataSizeInt ));
   checkCudaErrors(cudaMallocHost((void **)&data->SFD, dataSizeInt ));
+  checkCudaErrors(cudaMallocHost((void**)&data->prevfd, dataSizeInt));
+
   fprintf(data->outlog, "Flow direction (fd and SFD) space on host allocated %s\n", cudaGetErrorString(cudaGetLastError()));
 
   checkCudaErrors(cudaMallocHost((void **)&data->fa,           dataSize));

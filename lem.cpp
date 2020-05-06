@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 	if (!pars) pars = "default.par"; // use the default values
 	createfilenamespace(&data);
 	readinpar(&data, pars);
-	data.demfile = "30mfam.asc";
+	data.demfile = "30mfamA.txt";
 	//data.demfile = "pal25_bi20mod.asc";
 	checkparread(&data);
 
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 
 	createProcessMatrices(&data); // allocate sufficient memory on host
 	setProcessMatrices(&data);  // initialise values for attributes on host based upon parameter file inputs
-
+	
 	if (data.restart >0) {
 		///retriveProcessMatrices(&data)	; uses GDAL
 	} // call will also reset runiniter tp 0
@@ -84,8 +84,8 @@ int main(int argc, char* argv[]) {
 	createDeviceSpace(&data, &device);
 	modelruntype = 0;
 		
-   // for (int i = -100; i < 0; i++) {
-	int i = 1;
+    for (int i = -10; i < 0; i++) {
+	
 	printf("Iteration %d of %d :\n", i, last_pos_sim);
 
 	fprintf(data.outlog,"\n***********************\n");
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 		cleardevicespace_FD(&data, &device);
 
 	data.FDfile = "fd.txt";
-	write_int(&data, data.fd, data.FDfile);
+	if (i == -1) write_int(&data, data.fd, data.FDfile);
 
 		setdevicespace_FA(&data, &device);  // load matrices for runoffweight calculation
 		computeRunOffWeights(&data, &device); // calculate runoff
@@ -111,12 +111,13 @@ int main(int argc, char* argv[]) {
 		cleardevicespace_FA(&data, &device);
 
 	data.FAfile = "fa.txt";
-	write_double(&data, data.fa, data.FAfile);
+	if (i == -1) write_double(&data, data.fa, data.FAfile);
 
 	    setdevicespace_Process(&data, &device);
 	     erosionGPU(&data, &device, i);
 	    cleardevicespace_Process(&data, &device);
 
+		data.start_iter = -10;
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration
 		zerogrids(&data);
 
@@ -128,7 +129,11 @@ int main(int argc, char* argv[]) {
 		fprintf(data.outlog,"Finished Iteration %d\n", i);
 		fflush(data.outlog);
 
-	//} // end of iterations ****************************************************
+		//write_double(&data, data.dem, "demfile.asc");
+
+
+
+	} // end of iterations ****************************************************
 
 	clearDeviceSpace(&data, &device);
 	free(data.dem);

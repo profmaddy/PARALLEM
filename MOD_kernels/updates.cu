@@ -170,11 +170,12 @@ void update_newSurface(Data* data, Data* device, int iter)
 	//predicate function is_not_zero defined in header
 	thrust::copy_if(demlow_d, demlow_d + full_size, summary_d, is_not_negative());
 
-	if (data->dem[data->outletcellidx] >= 467.22)  data->dem[data->outletcellidx] = 467.22 ; // do not allow outlet cell to rise
+	//if (data->dem[data->outletcellidx] >= 467.22)  data->dem[data->outletcellidx] = 467.22 ; // do not allow outlet cell to rise
 	data->dem[data->outletcellidx] = data->dem[data->outletcellidx] - 0.00012 ;
 
 	// outlet cell is fixed in position now
 	fprintf(data->outlog, "MOD: Min DEM ht : %f \n", data->dem[data->outletcellidx]);
+	printf("MOD: Min DEM ht : %f \n", data->dem[data->outletcellidx]);
 	//printf("MOD: Min DEM ht : %f \n", data->dem[data->outletcellidx]);
 
 }

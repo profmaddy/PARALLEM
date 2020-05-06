@@ -3,6 +3,169 @@
 #include "io.h"
 #include "newflow.h"
 
+void checkdir(Data* data, int* grid) 
+{
+    int ncell_y = data->mapInfo.height;
+    int ncell_x = data->mapInfo.width;
+    int self;
+    int cellx, celly, dcell;
+    int counter;
+    int sinkcounter;
+    int xmove[9] = { 0,1,1,1,0,-1,-1,-1,0 };
+    int ymove[9] = { -1,-1,0,1,1,1,0,-1,0 };
+    int* dx;
+    int* dy;
+    dx = &xmove[0];
+    dy = &ymove[0];
+    data->dx = dx;
+    data->dy = dy;
+    int from;
+    from = 0;
+    counter = 0;
+    sinkcounter = 0;
+
+    for (int irow = 1; irow < ncell_y; irow++)  //irow loop
+    {
+        for (int icol = 1; icol < ncell_x; icol++) //icol loop
+        {
+            self = irow * ncell_x + icol;
+            if (data->mask[self] == 1) 
+            {
+                     for (dcell = 0; dcell < 8; dcell++)
+                    {
+                        cellx = icol + data->dx[dcell];
+                            celly = irow + data->dy[dcell];
+                            from = celly * ncell_x + cellx;
+                            if ( (dcell == 2) && (grid[self] & EAST) && (grid[from] & WEST) && (grid[from] != -9999) )
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 3) && (grid[self] & SOUTHEAST) && (grid[from] & NORTHWEST) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 4) && (grid[self] & SOUTH) && (grid[from] & NORTH) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 5) && (grid[self] & SOUTHWEST) && (grid[from] & NORTHEAST) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 6) && (grid[self] & WEST) && (grid[from] & EAST) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 7) && (grid[self] & NORTHWEST) && (grid[from] & SOUTHEAST) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 0) && (grid[self] & NORTH) && (grid[from] & SOUTH) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                            if ( (dcell == 1) && (grid[self] & NORTHEAST) && (grid[from] & SOUTHWEST) && (grid[from] != -9999))
+                            {
+                                fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
+                                counter++;
+                                grid[self] = 0;
+                            };
+                    }
+                     if (data->fd[self] == 0) sinkcounter++;
+            }
+        }
+    }
+    printf("Total number of opposing flow directions = %d and sinks %d \n", counter, sinkcounter);
+}
+
+
+void findthezeros(Data* data)
+{
+    int ncell_y = data->mapInfo.height;
+    int ncell_x = data->mapInfo.width;
+    int self;
+    int cellx, celly, dcell;
+    int zerocounter;
+    int xmove[9] = { 0,1,1,1,0,-1,-1,-1,0 };
+    int ymove[9] = { -1,-1,0,1,1,1,0,-1,0 };
+    int* dx;
+    int* dy;
+    dx = &xmove[0];
+    dy = &ymove[0];
+    data->dx = dx;
+    data->dy = dy;
+    zerocounter = 0;
+    int Zfd[9];
+    double Zht[9];
+
+    for (int irow = 0; irow < ncell_y; irow++)  //irow loop
+    {
+        for (int icol = 0; icol < ncell_x; icol++) //icol loop
+        {
+            self = irow * ncell_x + icol;
+            if ( (data->mask[self] == 1) && (data->fd[self] == 0) ) // in catchment
+            {
+                zerocounter++;
+                Zfd[8] = data->fd[self];
+                Zht[8] = data->dem[self];
+                for (dcell = 0; dcell < 8; dcell++)
+                {
+                    cellx = icol + data->dx[dcell];
+                    celly = irow + data->dy[dcell];
+                    Zfd[dcell] = data->fd[celly * ncell_x + cellx];
+                    Zht[dcell] = data->dem[celly * ncell_x + cellx];
+                }
+
+                //if (zerocounter < 11)
+                //{
+                    fprintf(data->outlog, "index of zero cell = %d \n", self);
+                    fprintf(data->outlog, "[%d][%d][%d]         [%lf][%lf][%lf]\n", Zfd[7], Zfd[0], Zfd[1], Zht[7], Zht[0], Zht[1]);
+                    fprintf(data->outlog, "[%d][%d][%d]         [%lf][%lf][%lf]\n", Zfd[6], Zfd[8], Zfd[2], Zht[6], Zht[8], Zht[2]);
+                    fprintf(data->outlog, "[%d][%d][%d]         [%lf][%lf][%lf]\n", Zfd[5], Zfd[4], Zfd[3], Zht[5], Zht[4], Zht[3]);
+                //}
+            }
+        }
+    }
+    fprintf(data->outlog, "number of zeros %d \n", zerocounter);
+}
+
+
+void quickfdcheck(Data* data, Data* device)
+{
+    int width = data->mapInfo.width;
+    int height = data->mapInfo.height;
+    int fullsize = width * height;
+    int counter;
+    counter = 0;
+
+    checkCudaErrors(cudaMemcpy(data->fd, device->fd, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyDeviceToHost));
+
+    for (int x = 0; x < fullsize; x++) {
+
+        if (data->mask[x] == 1) {
+            //if (data->fd[x] == 0) {
+                data->fd[x] = data->prevfd[x];
+            //    counter++;
+            //}
+        }
+    }
+    printf("number of zero directions altered = %d \n", counter);
+    checkCudaErrors(cudaMemcpy(device->fd, data->fd, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyHostToDevice));
+}
 
 double testoutletislowest(Data* data) {
  double lowest ;
@@ -37,165 +200,177 @@ printf("no data value %f\n", data->mapInfo.nodata);
 
 void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int ncell_x, int ncell_y, int cell_size, int iter) {
 
-//#ifndef PRODUCTION_RUN
-  printf("********************\n");
-  printf("Computing watershed\n");
-  printf("********************\n");
-//#endif
-  int width = data->mapInfo.width;
-  int height = data->mapInfo.height ;
-  int fullsize = width * height;
+    //#ifndef PRODUCTION_RUN
+    printf("********************\n");
+    printf("Computing watershed\n");
+    printf("********************\n");
+    //#endif
+    int width = data->mapInfo.width;
+    int height = data->mapInfo.height;
+    int fullsize = width * height;
 
-  fprintf(data->outlog,"FD: ************************\n");
-  fprintf(data->outlog,"FD: * Computing watersheds *\n");
-  fprintf(data->outlog,"FD: ************************\n");
+    fprintf(data->outlog, "FD: ************************\n");
+    fprintf(data->outlog, "FD: * Computing watersheds *\n");
+    fprintf(data->outlog, "FD: ************************\n");
 
-  int block_ncell_y = 16;
-  int block_ncell_x = 16;
-  int *counter;
-  int *counter_d;
-  int count = 0;
-  int *change_flag_d;
-  int *change_flag_h;
+    int block_ncell_y = 16;
+    int block_ncell_x = 16;
+    int* counter;
+    int* counter_d;
+    int count = 0;
+    int* change_flag_d;
+    int* change_flag_h;
 
-  int *change_flag_d2;
-  int *change_flag_h2;
+    int* change_flag_d2;
+    int* change_flag_h2;
 
-  // ** Flats (0) can still exist - but these are now parts of sinks...so deal with these
-  counter = (int*) malloc(sizeof(int)); //cleared
-  *counter = 0;
-  checkCudaErrors( cudaMalloc((void**)&counter_d, sizeof(int)) );
-  checkCudaErrors( cudaMemcpy(counter_d, counter, sizeof(int), cudaMemcpyHostToDevice) );
+    // ** Flats (0) can still exist - but these are now parts of sinks...so deal with these
+    counter = (int*)malloc(sizeof(int)); //cleared
+    *counter = 0;
+    checkCudaErrors(cudaMalloc((void**)&counter_d, sizeof(int)));
+    checkCudaErrors(cudaMemcpy(counter_d, counter, sizeof(int), cudaMemcpyHostToDevice));
 
-  // Identify each sink cell and assign it a watershed value
-  // This kernel identifies each cell which doesn't have a flow direction in SFD and assigns it a unique watershed value.
-  // Hence the value of counting is actually the number of cells without a flow direction
-  init_watershedMFD<<<dimGrid, dimBlock>>>(device->mask, device->SFD, device->watershed_id, device->dem, device->shortest_paths, device->dx, device->dy, counter_d, ncell_x, ncell_y);
-  fprintf(data->outlog,"FD: init_watershed :%s\n", cudaGetErrorString(cudaGetLastError()));
-  printf("FD: init_watershed :%s\n", cudaGetErrorString(cudaGetLastError()));
+   
+    data->SFD[data->outletcellidx] = 0; // make sure outlet cell is a sink
+    //write_int(data, data->SFD, "sfdflood.txt");
+ 
 
-#ifndef PRODUCTION_RUN
-  // Copy the watershed_id matrix back to see if there are any mistakes in it
-  // create memory to store this:
-  int size = data->mapInfo.height * data->mapInfo.width;
-  int* local_ws = (int*) malloc(size * sizeof(int));
-  checkCudaErrors( cudaMemcpy(local_ws, device->watershed_id, size * sizeof(int), cudaMemcpyDeviceToHost) );
-  int irow, icol;
-  printf("Before run\n");
-  for (irow = 0; irow < data->mapInfo.height; irow++) {
-	  for (icol = 0; icol < data->mapInfo.width; icol++) {
-		  int this_idx = irow * ncell_x + icol;
-		  if (local_ws[this_idx] > 10000) { // || local_ws[this_idx] < -10000) {
-			  printf("watershed1 created with invalid value [%d][%d]%d\n", icol, irow, local_ws[this_idx]);
-		  }
-		  //printf("%d, ", local_ws[this_idx]);
-	  }
-  }
-  free(local_ws);
-#endif
+     // Identify each sink cell and assign it a watershed value
+     // This kernel identifies each cell which doesn't have a flow direction in FD and assigns it a unique watershed value.
+     // Hence the value of counting is actually the number of cells without a flow direction
 
-//#ifndef PRODUCTION_RUN
-  checkCudaErrors( cudaMemcpy(counter, counter_d, sizeof(int), cudaMemcpyDeviceToHost));
-  fprintf(data->outlog, "FD: Total number of cells which are being processed as potential sinks = %d\n", *counter);
-  printf("FD: Total number of cells which are being processed as potential sinks = %d\n", *counter);
-//#endif
+    init_watershedMFD <<< dimGrid, dimBlock >>>(device->mask, device->SFD, device->watershed_id, device->dem, device->shortest_paths, device->dx, device->dy, counter_d, ncell_x, ncell_y);
+    
+    fprintf(data->outlog, "FD: init_watershed :%s\n", cudaGetErrorString(cudaGetLastError()));
+    printf("FD: init_watershed :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 
-  change_flag_h = (int*) malloc(sizeof(int));//cleared
-  change_flag_h2 = (int*) malloc(sizeof(int));//cleared
+    // Copy the watershed_id matrix back to see if there are any mistakes in it
+    // create memory to store this:
+    int size = data->mapInfo.height * data->mapInfo.width;
+    int* local_ws = (int*)malloc(size * sizeof(int));
+    checkCudaErrors(cudaMemcpy(local_ws, device->watershed_id, size * sizeof(int), cudaMemcpyDeviceToHost));
+    int irow, icol;
+    printf("Before run\n");
+    for (irow = 0; irow < data->mapInfo.height; irow++) {
+        for (icol = 0; icol < data->mapInfo.width; icol++) {
+            int this_idx = irow * ncell_x + icol;
+            if (local_ws[this_idx] > 10000) { // || local_ws[this_idx] < -10000) {
+                printf("watershed1 created with invalid value [%d][%d]%d\n", icol, irow, local_ws[this_idx]);
+            }
+            //printf("%d, ", local_ws[this_idx]);
+        }
+    }
 
-  checkCudaErrors( cudaMalloc((void**) &change_flag_d, sizeof(int)) );
-  checkCudaErrors( cudaMalloc((void**) &change_flag_d2, sizeof(int)) );
+    //write_int(data, local_ws, "local_ws.txt");
+    free(local_ws);
 
-  // We now go through all the cells marked as watersheds and merge them together. This is done by saying any two
-  // cells which are neighbours and are both marked as watersheds are in fact the same watershed. They both get allocated
-  // the same watershed id - the larger of the two watershed values.
-  // This is repeated until in a given iteration no cell has its watershed value changed - thus we have identified the
-  // minimum number of watersheds
-  do {
-    *change_flag_h = 0; // clear flag
-    checkCudaErrors( cudaMemcpy(change_flag_d, change_flag_h, sizeof(int), cudaMemcpyHostToDevice) );
+    checkCudaErrors(cudaMemcpy(counter, counter_d, sizeof(int), cudaMemcpyDeviceToHost));
+    fprintf(data->outlog, "FD: Total number of cells which are being processed as potential sinks = %d\n", *counter);
+    printf("FD: Total number of cells which are being processed as potential sinks = %d\n", *counter);
 
-    //** Process Watersheds
-    //**********************************************************************
-    // Reduce number of watersheds - neighbouring cells in the same plateau
-    // adopt the higher watershed values...
+    change_flag_h = (int*)malloc(sizeof(int));//cleared
+    change_flag_h2 = (int*)malloc(sizeof(int));//cleared
 
-    init_watershed_sinkMFD<<<dimGrid, dimBlock>>>(device->mask, device->SFD, device->watershed_id, device->dem, device->dx, device->dy, ncell_x, ncell_y, change_flag_d);
-    //if(count <3) fprintf(data->outlog,"FD: init_watershed_sink :%s\n", cudaGetErrorString(cudaGetLastError()));
-	checkCudaErrors(cudaMemcpy(change_flag_h, change_flag_d, sizeof(int), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMalloc((void**)&change_flag_d, sizeof(int)));
+    checkCudaErrors(cudaMalloc((void**)&change_flag_d2, sizeof(int)));
 
-	count ++;
+    // We now go through all the cells marked as watersheds and merge them together. This is done by saying any two
+    // cells which are neighbours and are both marked as watersheds are in fact the same watershed. They both get allocated
+    // the same watershed id - the larger of the two watershed values.
+    // This is repeated until in a given iteration no cell has its watershed value changed - thus we have identified the
+    // minimum number of watersheds
+    do {
+        *change_flag_h = 0; // clear flag
+        checkCudaErrors(cudaMemcpy(change_flag_d, change_flag_h, sizeof(int), cudaMemcpyHostToDevice));
 
-	//printf("FD: Merging watersheds iterations %d\n", count);
+        //** Process Watersheds
+        //**********************************************************************
+        // Reduce number of watersheds - neighbouring cells in the same plateau
+        // adopt the higher watershed values...
 
-  } while(*change_flag_h == 1);  // while we're still doing things...
+        init_watershed_sinkMFD << <dimGrid, dimBlock >> > (device->mask, device->SFD, device->watershed_id, device->dem, device->dx, device->dy, ncell_x, ncell_y, change_flag_d);
+        //if(count <3) fprintf(data->outlog,"FD: init_watershed_sink :%s\n", cudaGetErrorString(cudaGetLastError()));
+        checkCudaErrors(cudaMemcpy(change_flag_h, change_flag_d, sizeof(int), cudaMemcpyDeviceToHost));
+
+        count++;
+
+        //printf("FD: Merging watersheds iterations %d\n", count);
+
+    } while (*change_flag_h == 1);  // while we're still doing things...
 
 
-  fprintf(data->outlog,"FD: Merged watersheds in %d iterations\n", count);
-  printf("FD: Merged watersheds in %d iterations\n", count);
+    fprintf(data->outlog, "FD: Merged watersheds in %d iterations\n", count);
+    printf("FD: Merged watersheds in %d iterations\n", count);
 
-  fflush(data->outlog);
+    fflush(data->outlog);
 
-  checkCudaErrors( cudaMemcpy((void *)data->watershed_id, device->watershed_id, sizeof(int) * fullsize, cudaMemcpyDeviceToHost) );
-  //writeGRIDtoFile(data, "ws_merged.tif", 1, 1);
+    checkCudaErrors(cudaMemcpy((void*)data->watershed_id, device->watershed_id, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
+    //write_int(data, data->watershed_id, "waterID.txt");
+
+    count = 0;
+    // We have now defined all unique sinks, we now need to identify the full watershed for each sink - all cells which flow
+    // into that sink. To do this we ???
+    do {
+        // Reset change flag
+        *change_flag_h2 = 0;
+
+        checkCudaErrors(cudaMemcpy(change_flag_d2, change_flag_h2, sizeof(int), cudaMemcpyHostToDevice));
+        // *********************************************************************
+        // ** identify watershed
+        // *********************************************************************
+        // Assign watershed values to cells that don't currently have values
+        // assume same watershed value as cell I flow into...
+        // Q: Does this allocate a watershed value to all cells in the DEM?
+
+        identify_watershedMFD << <dimGrid, dimBlock >> > (device->mask, device->SFD, device->watershed_id, device->dx, device->dy, ncell_x, ncell_y, change_flag_d2);
+        //if(count <3) printf("FD: identify_watersheds :%s\n", cudaGetErrorString(cudaGetLastError()));
+        //printf("FD: identify_watersheds :%s count %d\n", cudaGetErrorString(cudaGetLastError()), count);
+
+        checkCudaErrors(cudaMemcpy(change_flag_h2, change_flag_d2, sizeof(int), cudaMemcpyDeviceToHost));
+
+        //printf("Reported last error = %s\n", cudaGetErrorString(cudaGetLastError()));
+
+        count++;
+
+        printf("FD: identify_watershedMFD loop iteration %d\n", count);
+        cudaDeviceSynchronize();
+
+    } while( (*change_flag_h2 == 1) && (count < 10000) ); 
 
 
-  count = 0;
-  // We have now defined all unique sinks, we now need to identify the full watershed for each sink - all cells which flow
-  // into that sink. To do this we ???
-  do {
-    // Reset change flag
-    *change_flag_h2 = 0;
+    // Copy the watershed_id matrix back to see if there are any mistakes in it
+    // create memory to store this:
+    int size2 = data->mapInfo.height * data->mapInfo.width;
+    int* local_ws2 = (int*)malloc(size2 * sizeof(int));
+    checkCudaErrors(cudaMemcpy(local_ws2, device->watershed_id, size2 * sizeof(int), cudaMemcpyDeviceToHost));
+    int irow2, icol2;
+    int invalid;
+    invalid = 0;
+    for (irow2 = 0; irow2 < data->mapInfo.height; irow2++)
+    {
+        for (icol2 = 0; icol2 < data->mapInfo.width; icol2++)
+        {
+            int this_idx = irow2 * ncell_x + icol2;
+            if (local_ws2[this_idx] > 10000 || local_ws2[this_idx] < -10000) invalid++;
+        }
+    }
 
-    checkCudaErrors(cudaMemcpy(change_flag_d2, change_flag_h2, sizeof(int), cudaMemcpyHostToDevice));
-    // *********************************************************************
-    // ** identify watershed
-    // *********************************************************************
-    // Assign watershed values to cells that don't currently have values
-    // assume same watershed value as cell I flow into...
-    // Q: Does this allocate a watershed value to all cells in the DEM?
-
-    identify_watershedMFD<<<dimGrid, dimBlock>>>(device->mask, device->SFD, device->watershed_id, device->dx, device->dy, ncell_x, ncell_y, change_flag_d2);
-    //if(count <3) fprintf(data->outlog,"FD: identify_watersheds :%s\n", cudaGetErrorString(cudaGetLastError()));
-    //printf("FD: identify_watersheds :%s\n", cudaGetErrorString(cudaGetLastError()));
-
-    checkCudaErrors( cudaMemcpy(change_flag_h2, change_flag_d2, sizeof(int), cudaMemcpyDeviceToHost) );
-
-    //printf("Reported last error = %s\n", cudaGetErrorString(cudaGetLastError()));
-
-    count ++;
-
-    //printf("FD: identify_watershedMFD loop iteration %d\n", count);
-
-  } while(*change_flag_h2 == 1);
-
-#ifndef PRODUCTION_RUN
-  // Copy the watershed_id matrix back to see if there are any mistakes in it
-  // create memory to store this:
-  int size2 = data->mapInfo.height * data->mapInfo.width;
-  int* local_ws2 = (int*) malloc(size2 * sizeof(int));
-  checkCudaErrors( cudaMemcpy(local_ws2, device->watershed_id, size2 * sizeof(int), cudaMemcpyDeviceToHost) );
-  int irow2, icol2;
-  for (irow2 = 0; irow2 < data->mapInfo.height; irow2++)
-	  for (icol2 = 0; icol2 < data->mapInfo.width; icol2++) {
-		  int this_idx = irow2 * ncell_x + icol2;
-		  if (local_ws[this_idx] > 10000 || local_ws[this_idx] < -10000) {
-			  printf("watershed created with invalid value %d\n", local_ws[this_idx]);
-		  }
-	  }
-  free(local_ws2);
-#endif
-
+  printf("no of watersheds created with invalid value %d\n", invalid);
   fprintf(data->outlog,"FD: Identified watersheds in %d iterations\n", count);
   printf("FD: Identified watersheds in %d iterations\n", count);
 
 
   // From here on in we're doing a hash table solution...
   // Is this a good idea...?
-
+ // write_int(data, local_ws2, "waterID2.txt");
   fflush(data->outlog);
+  free(local_ws2);
 
+  checkCudaErrors(cudaMemcpy((void*)device->SFD, data->SFD, sizeof(int) * fullsize, cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy((void*)device->fd, data->fd, sizeof(int) * fullsize, cudaMemcpyHostToDevice));
+  checkdir(data, data->fd);
+  checkdir(data, data->SFD);
 
 
 #ifndef PRODUCTION_RUN
@@ -452,8 +627,8 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
   fprintf(data->outlog,"FD: after route_plateaus:%s\n", cudaGetErrorString(cudaGetLastError()));
 
   // Now work out the slopes on cells in a plateaux
-  slope_plateausMFD<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->shortest_paths, ncell_x, ncell_y, device->lowHeight, device->SlopePtr, cell_size);
-  fprintf(data->outlog,"FD: slope pleateaus  :%s\n", cudaGetErrorString(cudaGetLastError()));
+ // slope_plateausMFD<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->shortest_paths, ncell_x, ncell_y, device->lowHeight, device->SlopePtr, cell_size);
+ // fprintf(data->outlog,"FD: slope pleateaus  :%s\n", cudaGetErrorString(cudaGetLastError()));
 
 
 //  Clean up memory usage for flooding driver
@@ -549,9 +724,8 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   lowest = testoutletislowest(data);
   if (lowest < data->dem[data->outletcellidx]) data->dem[data->outletcellidx] = lowest - 0.0001; //make sure outlet cell is the lowest for flooding routine
 
-//#ifndef PRODUCTION_RUN
-   printf("Lowest DEM value = %f, outletcell index %d, height at outletcell = %f\n",  lowest, data->outletcellidx, data->dem[data->outletcellidx] );
-//#endif
+  printf("Lowest DEM value = %f, outletcell index %d, height at outletcell = %f\n",  lowest, data->outletcellidx, data->dem[data->outletcellidx] );
+
 
 
 // copy the zeroed fd matrix to the GPU (all set for MFD i.e. 0 in setprocessmatices )
@@ -590,6 +764,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	   fprintf(data->outlog,"FD: initial sinks :%d \n", *sinkcounter_h);
 	   fprintf(data->outlog,"FD: initial flats :%d \n", *flatcounter_h);
 
+
    //now take care of the boundary cells with unallocated flow direction
 
   flow_boundaryMFD<<<dimGrid, dimBlock>>>( device->mask, device->dem, device->Slopes, device->SFD, device->fd, ncell_x, ncell_y);
@@ -603,6 +778,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy((void *)data->fd, device->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost) );
 
    // checkCudaErrors(cudaMemcpy((void *) data->prop, device->prop, 8* fullsize * sizeof(double), cudaMemcpyDeviceToHost) );
+
 
 // #ifndef PRODUCTION_RUN
   printf("Checking FD  %d\n", data->mapInfo.width * data->mapInfo.height);
@@ -702,6 +878,10 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy((void *)data->shortest_paths, device->shortest_paths, sizeof(float) * fullsize, cudaMemcpyDeviceToHost) );
   checkCudaErrors( cudaMemcpy((void *)data->Slopes, device->Slopes, 8 * fullsize * sizeof(double), cudaMemcpyDeviceToHost));
 
+  checkdir(data, data->fd);
+  checkdir(data, data->SFD);
+
+
   //write_float(data, data->shortest_paths, "sp2.txt");
 
 
@@ -727,20 +907,22 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 
   	if (sinkcount > *sinkcounter_h) {
   		printf ("Something went wrong, sinks remaining = %d but sinks in initial DEM are %d\n", sinkcount, *sinkcounter_h);
-  		//writeGRIDtoFile(data, "fd_sinksleft.tif", 1, 0);
+        data->FDfile = "fdwithsinks.txt";
+        write_int(data, data->fd, data->FDfile);
   		//exit(0);
   	}
  // #endif
+    findthezeros(data);
 
-     fflush(data->outlog);
+    fflush(data->outlog);
 
 	//data->FDfile = "fdwithsinks.txt";
 	//write_int(data, data->fd, data->FDfile);
 
-    if (sinkcount > 1) {
-        floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize /*data->mapInfo.cellsize*/, iter);
-        fprintf(data->outlog, "FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError()));
-    }
+     data->sinkcount = sinkcount;
+     if (sinkcount>0) floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize, iter);
+     fprintf(data->outlog, "FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError()));
+ 
 
   	//checkCudaErrors(cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );
   	//checkCudaErrors(cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(double), cudaMemcpyDeviceToHost));
@@ -763,6 +945,13 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	 }
 	 printf("Total number of FD = 0: %d \n", nonvaluecount);
 #endif
+
+     
+     checkCudaErrors(cudaMemcpy((void*)data->SFD, device->SFD, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));
+     checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));
+     checkdir(data, data->fd);
+     checkdir(data, data->SFD);
+
 
   cudaEventRecord(stop,0);
   cudaEventSynchronize(stop);
