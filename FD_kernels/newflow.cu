@@ -251,6 +251,7 @@ __global__ void shortest_paths_plateaus_initMFD(int *mask, double *zs, int *fd, 
     
     shortest_paths[self] = 20000000;
     if (fd[self] > 0) shortest_paths[self] = 0;
+    if (SFD[self] > 0) shortest_paths[self] = 0;
         
 }
 
@@ -437,6 +438,8 @@ __global__ void init_watershed_sinkMFD(int *mask, int *SFD, int *watershed_id, d
 	int self = irow * ncell_x + icol;
 	if (mask[self] != 1) return; // don't calculate if not in catchment(s) of interest
 
+    //if (watershed_id[self] == 0) return;
+
   if(SFD[self] == 0) { // if we're part of a flat - now coded for MFD
     int w_id = -1;
     for (int dcell = 0; dcell < 8; dcell ++) { // for each of the cells around me...
@@ -444,7 +447,7 @@ __global__ void init_watershed_sinkMFD(int *mask, int *SFD, int *watershed_id, d
       int celly = irow + dy [dcell];
       if (cellx >= 0 && cellx < ncell_x && celly >= 0 && celly < ncell_y) { // check we're still inside of the DEM
         int idx = celly * ncell_x + cellx;
-        if(zs[idx] == zs[self] && watershed_id[idx] > watershed_id[self]) {
+        if(zs[idx] == zs[self] && watershed_id[idx] > watershed_id[self] ) {
         // if there's a watershed next to me (within the same plateau) with a higher index then use the index of that watershed
           w_id = watershed_id[idx];
           *changed = 1; // something has changed...
@@ -472,33 +475,15 @@ __global__ void identify_watershedMFD(int *mask, int *SFD, int *watershed_id, in
     return;
 
 	int self = irow * ncell_x + icol;
-	if (mask[self] != 1) return; // don't calculate if not in catchment(s) of interest
+    if (mask[self] != 1)  return; // don't calculate if not in catchment(s) of interest
+    
     if (watershed_id[self] < 0)
     {
         //watershed_id[self] = watershed_id[-watershed_id[self] - 1];
-        watershed_id[self] = watershed_id[watershed_id[self] - 1] * -1;;
+        watershed_id[self] = watershed_id[-watershed_id[self] - 1];;
         *changed = 1;
     }
 
-    
-    // point to the cell that the cell I'm pointing at points to
-    // each watershed is shifted down by 1 to deal with 0 - which could be a watershed
-    // this will either be a watershed value or a pointer to another cell (closer to the watershed) 
-    //if (watershed_id[self] < 0) 
-
-   /* int watershed;
-    watershed = watershed_id[(watershed_id[self] * -1)];
-    watershed = watershed + 1;
-
-    if ( watershed > 0) // I am looking at a sink or a cell that points to this sink
-    {
-        watershed_id[self] = watershed ;
-        *changed = 1;
-        //if (watershed_id[self] > 10000) {
-        //    printf("Watershed value too large in pointer jump %d\n", watershed_id[self]);
-        //}
-*/
-   // } // something updated so need to go around again
 }
 
 

@@ -31,6 +31,8 @@ void checkdir(Data* data, int* grid)
             self = irow * ncell_x + icol;
             if (data->mask[self] == 1) 
             {
+                    if (grid[self] == 0)  sinkcounter++;
+
                      for (dcell = 0; dcell < 8; dcell++)
                     {
                         cellx = icol + data->dx[dcell];
@@ -40,52 +42,51 @@ void checkdir(Data* data, int* grid)
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 3) && (grid[self] & SOUTHEAST) && (grid[from] & NORTHWEST) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 4) && (grid[self] & SOUTH) && (grid[from] & NORTH) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 5) && (grid[self] & SOUTHWEST) && (grid[from] & NORTHEAST) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 6) && (grid[self] & WEST) && (grid[from] & EAST) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 7) && (grid[self] & NORTHWEST) && (grid[from] & SOUTHEAST) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 0) && (grid[self] & NORTH) && (grid[from] & SOUTH) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                             if ( (dcell == 1) && (grid[self] & NORTHEAST) && (grid[from] & SOUTHWEST) && (grid[from] != -9999))
                             {
                                 fprintf(data->outlog, "opposing flow directions at cell %d, fd = %d, from cell %d, fd = %d \n", self, grid[self], from, grid[from]);
                                 counter++;
-                                grid[self] = 0;
+                                //grid[self] = 0;
                             };
                     }
-                     if (data->fd[self] == 0) sinkcounter++;
             }
         }
     }
@@ -306,7 +307,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
     fflush(data->outlog);
 
     checkCudaErrors(cudaMemcpy((void*)data->watershed_id, device->watershed_id, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
-    //write_int(data, data->watershed_id, "waterID.txt");
+   // write_int(data, data->watershed_id, "waterID.asc");
 
     count = 0;
     // We have now defined all unique sinks, we now need to identify the full watershed for each sink - all cells which flow
@@ -336,7 +337,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
         printf("FD: identify_watershedMFD loop iteration %d\n", count);
         cudaDeviceSynchronize();
 
-    } while( (*change_flag_h2 == 1) && (count < 10000) ); 
+    } while ((*change_flag_h2 == 1)); // && (count < 10) ); 
 
 
     // Copy the watershed_id matrix back to see if there are any mistakes in it
@@ -363,14 +364,17 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
   // From here on in we're doing a hash table solution...
   // Is this a good idea...?
- // write_int(data, local_ws2, "waterID2.txt");
+  write_int(data, local_ws2, "waterID2.txt");
   fflush(data->outlog);
   free(local_ws2);
+ // write_int(data, data->SFD, "SFD.asc");
 
-  checkCudaErrors(cudaMemcpy((void*)device->SFD, data->SFD, sizeof(int) * fullsize, cudaMemcpyHostToDevice));
-  checkCudaErrors(cudaMemcpy((void*)device->fd, data->fd, sizeof(int) * fullsize, cudaMemcpyHostToDevice));
-  checkdir(data, data->fd);
-  checkdir(data, data->SFD);
+
+
+  checkCudaErrors(cudaMemcpy((void*)device->SFD, data->SFD, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpy((void*)device->fd, data->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
+  //checkdir(data, data->fd);
+  //checkdir(data, data->SFD);
 
 
 #ifndef PRODUCTION_RUN
@@ -594,6 +598,10 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
   //		ncount ++;
   //}
 
+ // checkCudaErrors(cudaMemcpy(data->dem, device->dem, fullsize * sizeof(double), cudaMemcpyDeviceToHost));
+ // write_double(data, data->dem, "dempreraise.asc");
+
+
   cudaMemcpy((void*)raise_d, (void*) raise, (max_watershed + 1) * sizeof(HASH_TYPE), cudaMemcpyHostToDevice);
 
   raise_watershedMFD<<<dimGrid, dimBlock>>>(device->mask, device->watershed_id, raise_d, device->dem, ncell_x, ncell_y);
@@ -601,15 +609,33 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
   cudaDeviceSynchronize();
 
+ // checkCudaErrors(cudaMemcpy(data->dem, device->dem, fullsize * sizeof(double), cudaMemcpyDeviceToHost));
+ // write_double(data, data->dem, "demraised.asc");
+
+
+
+
   // THIS NEEDS CHECKING FOR MFD - add in flow type to call set here to 1 MFD
 
 
   // FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, double *prop, int *aspects,int flowtype, int cell_size, int ncell_x, int ncell_y, int *dx, int *dy, int last);
-  //FlowDirs<<<dimGrid, dimBlock>>>(device->mask, device->flatmask, device->dem, device->Slopes, device->SFD, device->prop, device->fd, 1, csize, ncell_x, ncell_y, device->dx, device->dy, 0, sinkcounter_d);
+  int csize = (int)data->mapInfo.cellsize;
+
+  int* sinkcounter_h, * sinkcounter_d;
+  int* flatcounter_h, * flatcounter_d;
+
+  sinkcounter_h = (int*)malloc(sizeof(int));
+  checkCudaErrors(cudaMalloc((void**)&sinkcounter_d, sizeof(int)));
+
+  flatcounter_h = (int*)malloc(sizeof(int));
+  checkCudaErrors(cudaMalloc((void**)&flatcounter_d, sizeof(int)));
+
+  FlowDirs << <dimGrid, dimBlock >> > (device->mask, device->flatmask, device->dem, device->Slopes, device->SFD, device->prop, device->fd, 1, csize, ncell_x, ncell_y, device->dx, device->dy, 0, sinkcounter_d, flatcounter_d);
   fprintf(data->outlog,"FD: second single flow direction  :%s\n", cudaGetErrorString(cudaGetLastError()));
 
- // flow_boundary<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->SlopePtr, device->fd, ncell_x, ncell_y, device->dx, device->dy);
- // fprintf(data->outlog,"FD: second flow boundary  :%s\n", cudaGetErrorString(cudaGetLastError()));
+  //flow_boundaryMFD<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->SlopePtr, device->fd, ncell_x, ncell_y, device->dx, device->dy);
+  //flow_boundaryMFD << <dimGrid, dimBlock >> > (device->mask, device->dem, device->Slopes, device->SFD, device->fd, ncell_x, ncell_y);
+  fprintf(data->outlog,"FD: second flow boundary  :%s\n", cudaGetErrorString(cudaGetLastError()));
 
   //printf("after flow boundary:%s\n", cudaGetErrorString(cudaGetLastError()));
 
@@ -767,7 +793,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 
    //now take care of the boundary cells with unallocated flow direction
 
-  flow_boundaryMFD<<<dimGrid, dimBlock>>>( device->mask, device->dem, device->Slopes, device->SFD, device->fd, ncell_x, ncell_y);
+  //flow_boundaryMFD<<<dimGrid, dimBlock>>>( device->mask, device->dem, device->Slopes, device->SFD, device->fd, ncell_x, ncell_y);
 
   // printf("After flow_boundary :%s\n", cudaGetErrorString(cudaGetLastError()));
 
@@ -813,7 +839,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 // #endif
 
 	//data->FDfile = "fdwithzeros.txt";
-	//write_int(data, data->fd, data->FDfile);
+	//write_int(data, data->fd, "beforeSP.asc");
 	//writeGRIDtoFile(data, "init_fd.tif", 1, 0);
 
 	shortest_paths_plateaus_initMFD<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->fd, device->SFD, device->shortest_paths, csize, data->mapInfo.width, data->mapInfo.height, device->lowHeight);
@@ -839,7 +865,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	printf("FD: first shortest_path_plateaus_init :%s\n", cudaGetErrorString(cudaGetLastError()));
 	fprintf(data->outlog,"FD: first shortest_path_plateaus_init :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-	//write_float(data, data->shortest_paths, "sp.txt");
+	//write_float(data, data->shortest_paths, "shortpath.asc");
 
   // Set up a flag to indicate if we have had any change since the last iteration?
   int *change_flag_h, *change_flag_d;
@@ -878,11 +904,9 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy((void *)data->shortest_paths, device->shortest_paths, sizeof(float) * fullsize, cudaMemcpyDeviceToHost) );
   checkCudaErrors( cudaMemcpy((void *)data->Slopes, device->Slopes, 8 * fullsize * sizeof(double), cudaMemcpyDeviceToHost));
 
-  checkdir(data, data->fd);
-  checkdir(data, data->SFD);
 
 
-  //write_float(data, data->shortest_paths, "sp2.txt");
+  //write_int(data, data->fd, "sp2.txt");
 
 
   //checkCudaErrors(cudaMemcpy((void *) data->Slopes, device->Slopes, 8* fullsize * sizeof(double), cudaMemcpyDeviceToHost) );
@@ -907,8 +931,8 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 
   	if (sinkcount > *sinkcounter_h) {
   		printf ("Something went wrong, sinks remaining = %d but sinks in initial DEM are %d\n", sinkcount, *sinkcounter_h);
-        data->FDfile = "fdwithsinks.txt";
-        write_int(data, data->fd, data->FDfile);
+       // data->FDfile = "fdwithsinks.txt";
+       // write_int(data, data->fd, data->FDfile);
   		//exit(0);
   	}
  // #endif
@@ -919,7 +943,12 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	//data->FDfile = "fdwithsinks.txt";
 	//write_int(data, data->fd, data->FDfile);
 
+
+   // checkdir(data, data->fd);
+    //checkdir(data, data->SFD);
+
      data->sinkcount = sinkcount;
+     printf("Entering flooding \n");
      if (sinkcount>0) floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize, iter);
      fprintf(data->outlog, "FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError()));
  
@@ -948,10 +977,17 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 
      
      checkCudaErrors(cudaMemcpy((void*)data->SFD, device->SFD, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));
-     checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));
-     checkdir(data, data->fd);
+     checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));     
      checkdir(data, data->SFD);
-
+     for (int i = 0; i < fullsize; i++) {
+         if ((data->fd[i] <= 0) && (data->mask[i] == 1)) 
+             //if ((data->mask[i] == 1))
+         {
+             data->fd[i] = data->SFD[i];
+         }
+     }
+     //checkdir(data, data->fd);
+     //checkCudaErrors(cudaMemcpy((void*)device->fd,data->fd, sizeof(int)* fullsize, cudaMemcpyHostToDevice));
 
   cudaEventRecord(stop,0);
   cudaEventSynchronize(stop);

@@ -163,9 +163,11 @@ void erosionGPU(Data* data, Data* device, int iter)
 	checkCudaErrors( cudaMemcpy( data->TotBPtr,  device->TotBPtr,  full_size * sizeof(double), cudaMemcpyDeviceToHost) );
 	fprintf(data->outlog, "MOD: mem copyback TotBn :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-	checkCudaErrors(cudaMemcpy(data->dem, device->dem, full_size * sizeof(double), cudaMemcpyDeviceToHost));
+	//checkCudaErrors(cudaMemcpy(data->dem, device->dem, full_size * sizeof(double), cudaMemcpyDeviceToHost));
+	//write_double(data, data->dem, "dem2.asc");
+
 	//fillthesinks(data); // use this until flooding is working
-	checkCudaErrors(cudaMemcpy(device->dem, data->dem, full_size * sizeof(double), cudaMemcpyHostToDevice));
+	//checkCudaErrors(cudaMemcpy(device->dem, data->dem, full_size * sizeof(double), cudaMemcpyHostToDevice));
 
 	cudaEventRecord(stop,0);
 	cudaEventSynchronize(stop);
