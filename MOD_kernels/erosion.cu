@@ -92,34 +92,38 @@ void erosionGPU(Data* data, Data* device, int iter)
 	aveslope(data, device);
 
 	calc_diff_erosion(data, device);
-		//write_double(data, data->eroPtr, "differo.txt");
+		
 		thrust::device_ptr<double> difftot_d = thrust::device_pointer_cast(device->eroPtr);
 		data->totE = thrust::reduce(difftot_d, difftot_d + full_size);
 		fprintf(data->outlog, "total concentrated  from thrust is %10.8lf \n", data->totE);
 		printf("total concentrated  from thrust is %f \n", data->totE);
+		if (iter == -1) write_double(data, data->eroPtr, "differo.asc");
 
 	calc_conc_erosion(data, device);
-		//write_double(data, data->inciPtr, "concero.txt");
+		
 		thrust::device_ptr<double> incitot_d = thrust::device_pointer_cast(device->inciPtr);
 		cudaSetDevice(0);
 		data->totI = thrust::reduce(incitot_d, incitot_d + full_size, (double)0);
 		fprintf(data->outlog, "total Incision from thrust is %10.8lf \n", data->totI);
 		printf("total Incision from thrust is %10.8lf \n", data->totI);
+		if (iter == -1) write_double(data, data->inciPtr, "concero.asc");
 
 	calc_gelifluction(data, device);
-		//write_double(data, data->geliPtr, "geliero.txt");
+		
 		thrust::device_ptr<double> gelitot_d = thrust::device_pointer_cast(device->geliPtr);
 		cudaSetDevice(0);
 		data->totG = thrust::reduce(gelitot_d, gelitot_d + full_size, (double)0);
 		fprintf(data->outlog, "total gelifluction from thrust is %10.8lf \n", data->totG);
 		printf("total gelifluction from thrust is %10.8lf \n", data->totG);
+		if (iter == -1) write_double(data, data->geliPtr, "geliero.asc");
 	
 	fflush(data->outlog);
 
 	checkCudaErrors( cudaMemcpy ( device->mask, data->mask, full_size * sizeof(int), cudaMemcpyHostToDevice) );
 
 	sedmfdaccum(data, device);
-	//write_double(data, data->depoPtr, "depo.txt");
+	
+	if (iter == -1) write_double(data, data->depoPtr, "depo.asc");
 	
 	fprintf(data->outlog, "MOD: returned from sedmfdaccum :%s\n", cudaGetErrorString(cudaGetLastError()));
 

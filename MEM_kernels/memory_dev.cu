@@ -108,7 +108,7 @@ void setdevicespace_FA(Data* data, Data* device)
 	// now copy the necessary data - these will not overlap becasue they are all on the same stream
 
 	//checkCudaErrors(cudaSetDevice(0));
-	//checkCudaErrors( cudaMemcpy( device->fa, data->fa, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
+	checkCudaErrors( cudaMemcpy( device->dem, data->dem, full_size * sizeof(double), cudaMemcpyHostToDevice)) ; // copy the non-raised DEM back to GPU
 	checkCudaErrors( cudaMemcpy( device->fd, data->fd, full_size * sizeof(int), cudaMemcpyHostToDevice)) ;
 	checkCudaErrors( cudaMemcpy( device->runoffweight, data->runoffweight, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
 

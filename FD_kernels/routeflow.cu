@@ -334,7 +334,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
         count++;
 
-        printf("FD: identify_watershedMFD loop iteration %d\n", count);
+        //printf("FD: identify_watershedMFD loop iteration %d\n", count);
         cudaDeviceSynchronize();
 
     } while ((*change_flag_h2 == 1)); // && (count < 10) ); 
@@ -936,7 +936,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   		//exit(0);
   	}
  // #endif
-    findthezeros(data);
+    //findthezeros(data);
 
     fflush(data->outlog);
 
