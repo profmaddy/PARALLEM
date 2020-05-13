@@ -245,7 +245,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
     fprintf(data->outlog, "FD: init_watershed :%s\n", cudaGetErrorString(cudaGetLastError()));
     printf("FD: init_watershed :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-
+#ifndef PRODUCTION_RUN
     // Copy the watershed_id matrix back to see if there are any mistakes in it
     // create memory to store this:
     int size = data->mapInfo.height * data->mapInfo.width;
@@ -265,6 +265,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
     //write_int(data, local_ws, "local_ws.txt");
     free(local_ws);
+#endif
 
     checkCudaErrors(cudaMemcpy(counter, counter_d, sizeof(int), cudaMemcpyDeviceToHost));
     fprintf(data->outlog, "FD: Total number of cells which are being processed as potential sinks = %d\n", *counter);
@@ -300,10 +301,8 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
     } while (*change_flag_h == 1);  // while we're still doing things...
 
-
     fprintf(data->outlog, "FD: Merged watersheds in %d iterations\n", count);
     printf("FD: Merged watersheds in %d iterations\n", count);
-
     fflush(data->outlog);
 
     checkCudaErrors(cudaMemcpy((void*)data->watershed_id, device->watershed_id, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
@@ -325,7 +324,6 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
         // Q: Does this allocate a watershed value to all cells in the DEM?
 
         identify_watershedMFD << <dimGrid, dimBlock >> > (device->mask, device->SFD, device->watershed_id, device->dx, device->dy, ncell_x, ncell_y, change_flag_d2);
-        //if(count <3) printf("FD: identify_watersheds :%s\n", cudaGetErrorString(cudaGetLastError()));
         //printf("FD: identify_watersheds :%s count %d\n", cudaGetErrorString(cudaGetLastError()), count);
 
         checkCudaErrors(cudaMemcpy(change_flag_h2, change_flag_d2, sizeof(int), cudaMemcpyDeviceToHost));
@@ -339,7 +337,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
     } while ((*change_flag_h2 == 1)); // && (count < 10) ); 
 
-
+#ifndef PRODUCTION_RUN
     // Copy the watershed_id matrix back to see if there are any mistakes in it
     // create memory to store this:
     int size2 = data->mapInfo.height * data->mapInfo.width;
@@ -356,26 +354,18 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
             if (local_ws2[this_idx] > 10000 || local_ws2[this_idx] < -10000) invalid++;
         }
     }
-
-  printf("no of watersheds created with invalid value %d\n", invalid);
-  fprintf(data->outlog,"FD: Identified watersheds in %d iterations\n", count);
-  printf("FD: Identified watersheds in %d iterations\n", count);
-
-
-  // From here on in we're doing a hash table solution...
-  // Is this a good idea...?
-  write_int(data, local_ws2, "waterID2.txt");
-  fflush(data->outlog);
-  free(local_ws2);
- // write_int(data, data->SFD, "SFD.asc");
-
-
+      printf("no of watersheds created with invalid value %d\n", invalid);
+      fprintf(data->outlog,"FD: Identified watersheds in %d iterations\n", count);
+      printf("FD: Identified watersheds in %d iterations\n", count);
+      // From here on in we're doing a hash table solution...
+      // Is this a good idea...?
+      write_int(data, local_ws2, "waterID2.txt");
+      fflush(data->outlog);
+      free(local_ws2);
+#endif
 
   checkCudaErrors(cudaMemcpy((void*)device->SFD, data->SFD, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaMemcpy((void*)device->fd, data->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost));
-  //checkdir(data, data->fd);
-  //checkdir(data, data->SFD);
-
 
 #ifndef PRODUCTION_RUN
   printf("Working on hash\n");
@@ -791,10 +781,8 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	   fprintf(data->outlog,"FD: initial flats :%d \n", *flatcounter_h);
 
 
-   //now take care of the boundary cells with unallocated flow direction
-
+  //now take care of the boundary cells with unallocated flow direction
   //flow_boundaryMFD<<<dimGrid, dimBlock>>>( device->mask, device->dem, device->Slopes, device->SFD, device->fd, ncell_x, ncell_y);
-
   // printf("After flow_boundary :%s\n", cudaGetErrorString(cudaGetLastError()));
 
   //copy back new matrices
@@ -802,9 +790,6 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy((void *)data->SFD, device->SFD, sizeof(int) * fullsize, cudaMemcpyDeviceToHost) );
   checkCudaErrors(cudaMemcpy((void *) data->Slopes, device->Slopes, 8 * fullsize * sizeof(double), cudaMemcpyDeviceToHost) );
   checkCudaErrors( cudaMemcpy((void *)data->fd, device->fd, sizeof(int) * fullsize, cudaMemcpyDeviceToHost) );
-
-   // checkCudaErrors(cudaMemcpy((void *) data->prop, device->prop, 8* fullsize * sizeof(double), cudaMemcpyDeviceToHost) );
-
 
 // #ifndef PRODUCTION_RUN
   printf("Checking FD  %d\n", data->mapInfo.width * data->mapInfo.height);
@@ -817,8 +802,9 @@ void cuFlowDirection(Data* data, Data* device, int iter)
    cellsincatchment = 0;
    fdtoobig = 0;
    negingrid = 0;
-	// Validate Flow Directions and mapout cells which need to be ignored for later MFD
 
+   // Validate Flow Directions and mapout cells which need to be ignored for later MFD
+#ifndef PRODUCTION_RUN
    for (int j = 0; j < fullsize; j++){
 		if ((data->mask[j] == 1))
 			  {
@@ -835,20 +821,13 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	fprintf(data->outlog,"Edge Flat and Sink count in catchment: %d of %d cells in catchment\n", flatandsinkcount, cellsincatchment );
 	fprintf(data->outlog,"Negative FD in catchment: %d \n", negingrid);
     fflush(data->outlog);
-
-// #endif
-
-	//data->FDfile = "fdwithzeros.txt";
-	//write_int(data, data->fd, "beforeSP.asc");
-	//writeGRIDtoFile(data, "init_fd.tif", 1, 0);
+#endif
 
 	shortest_paths_plateaus_initMFD<<<dimGrid, dimBlock>>>(device->mask, device->dem, device->fd, device->SFD, device->shortest_paths, csize, data->mapInfo.width, data->mapInfo.height, device->lowHeight);
-
 	checkCudaErrors( cudaMemcpy((void *)data->shortest_paths, device->shortest_paths, sizeof(float) * fullsize, cudaMemcpyDeviceToHost) );
-
     fprintf(data->outlog, "FD: return from shortest_paths_plateaus :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-
+#ifndef PRODUCTION_RUN
 	int numsfdpath;
 	numsfdpath= 0;
 
@@ -864,8 +843,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	printf("Number of shortest_paths: %d \n", numsfdpath );
 	printf("FD: first shortest_path_plateaus_init :%s\n", cudaGetErrorString(cudaGetLastError()));
 	fprintf(data->outlog,"FD: first shortest_path_plateaus_init :%s\n", cudaGetErrorString(cudaGetLastError()));
-
-	//write_float(data, data->shortest_paths, "shortpath.asc");
+#endif
 
   // Set up a flag to indicate if we have had any change since the last iteration?
   int *change_flag_h, *change_flag_d;
@@ -904,14 +882,6 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors( cudaMemcpy((void *)data->shortest_paths, device->shortest_paths, sizeof(float) * fullsize, cudaMemcpyDeviceToHost) );
   checkCudaErrors( cudaMemcpy((void *)data->Slopes, device->Slopes, 8 * fullsize * sizeof(double), cudaMemcpyDeviceToHost));
 
-
-
-  //write_int(data, data->fd, "sp2.txt");
-
-
-  //checkCudaErrors(cudaMemcpy((void *) data->Slopes, device->Slopes, 8* fullsize * sizeof(double), cudaMemcpyDeviceToHost) );
-
-// #ifndef PRODUCTION_RUN
     printf("Checking FD after route plateau  %d\n", data->mapInfo.width * data->mapInfo.height);
     // check the values coming back
      int sinkcount ;
@@ -935,32 +905,17 @@ void cuFlowDirection(Data* data, Data* device, int iter)
        // write_int(data, data->fd, data->FDfile);
   		//exit(0);
   	}
- // #endif
-    //findthezeros(data);
-
     fflush(data->outlog);
-
-	//data->FDfile = "fdwithsinks.txt";
-	//write_int(data, data->fd, data->FDfile);
+    data->sinkcount = sinkcount;
 
 
-   // checkdir(data, data->fd);
-    //checkdir(data, data->SFD);
-
-     data->sinkcount = sinkcount;
-     printf("Entering flooding \n");
-     if (sinkcount>0) floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize, iter);
-     fprintf(data->outlog, "FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError()));
+    printf("Entering flooding \n");
+    if (sinkcount>0) floodingDriver(dimGrid, dimBlock, data, device, data->mapInfo.width, data->mapInfo.height, csize, iter);
+    fprintf(data->outlog, "FD: errors after return from flooding driver :%s\n", cudaGetErrorString(cudaGetLastError()));
  
-
-  	//checkCudaErrors(cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );cudaMemcpy(progress_d, temp, sizeof(unsigned int), cudaMemcpyHostToDevice) );
-  	//checkCudaErrors(cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(double), cudaMemcpyDeviceToHost));
-
  // bring back altered data
 	checkCudaErrors( cudaMemcpy(data->fd, device->fd, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyDeviceToHost) );
-	//checkCudaErrors( cudaMemcpy(data->SlopePtr, device->SlopePtr, data->mapInfo.height * data->mapInfo.width * sizeof(int), cudaMemcpyDeviceToHost) );
-
-	 printf("outlet cell direction = %d\n", data->fd[data->outletcellidx])  ; // check the outlet cell direction was set by flow_boundary routine
+	printf("outlet cell direction = %d\n", data->fd[data->outletcellidx])  ; // check the outlet cell direction was set by flow_boundary routine
 
 #ifndef PRODUCTION_RUN
     int nonvaluecount = 0;
@@ -974,8 +929,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
 	 }
 	 printf("Total number of FD = 0: %d \n", nonvaluecount);
 #endif
-
-     
+          
      checkCudaErrors(cudaMemcpy((void*)data->SFD, device->SFD, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));
      checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));     
      checkdir(data, data->SFD);
@@ -986,9 +940,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
              data->fd[i] = data->SFD[i];
          }
      }
-     //checkdir(data, data->fd);
-     //checkCudaErrors(cudaMemcpy((void*)device->fd,data->fd, sizeof(int)* fullsize, cudaMemcpyHostToDevice));
-
+     
   cudaEventRecord(stop,0);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&time, start, stop);
@@ -996,9 +948,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   cudaEventDestroy(stop);
 
   cudaFree(change_flag_d);
-
-  //cudaFree(device->flatmask); // clear the original flatmap
-
+  
   free(data->shortest_paths);
   free(data->fdmod);
   free(change_flag_h);

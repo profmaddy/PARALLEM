@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 	createDeviceSpace(&data, &device);
 	modelruntype = 0;
 		
-    for (int i = -20; i < 0; i++) {
+    for (int i = -100; i < 0; i++) {
 	
 	printf("Iteration %d of %d :\n", i, last_pos_sim);
 
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 	     erosionGPU(&data, &device, i);
 	    cleardevicespace_Process(&data, &device);
 
-		data.start_iter = -20;
+		data.start_iter = -100;
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration
 		zerogrids(&data);
 

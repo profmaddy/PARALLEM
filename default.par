@@ -25,7 +25,7 @@ soilT.tif
 600.0                                   #gelifluction flow limiter (to omit larger channel cells)
 0.00001                                 #conc erosion flow A parameter
 1.3                                     #conc erosion flow B parameter
-0.0004                                  #conc erosion max incision parameter
+0.004                                   #conc erosion max incision parameter
 0.0                                     # 
 0.0                                     # 
 0.9                                     #diffuse erosion travel distance

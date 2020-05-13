@@ -112,6 +112,8 @@ __global__ void conc_erosion( int *mask, double *inciPtr, double *FAPtr, double 
 	double slope;
 	slope = SlopePtr[self];
 	if (slope > 0.5) slope = 0.5;
+	if (slope == 0) slope = 0.0001;
+
 	double max_incision = maxincision;
 			//slope * cellsize ; // changed for scaling 14/01/16
 

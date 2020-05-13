@@ -1,17 +1,6 @@
 
 #include "runoffweight.h"
 #include "io.h"
-/*!
-
-  Calculates the actual runoff from individual cell in m.
-
-  OLD VERSION:: runoff_coeff = (1.0 - 0.0085 * (stonePtr[self])) * exp (-0.0025 * (TotBPtr[self]) / 76.5)	* tanh (0.6 + (soilMPtr[self]) / 0.2);
-
-  runoff_coeff = (1.0 - 0.0085 * (stonePtr[self])) * exp (-0.0025 * (TotBPtr[self]) / 76.5)	; // newer version is simplified?
-
-  runoff = ppn * runoff_coeff;  ppn is depth of rain in m, runoff is therefore a depth in m
-
-*/
 
 struct is_not_zero
 {
@@ -29,12 +18,11 @@ struct is_not_negative
 	}
 };
 
-
 __global__ void calcrunoffweight(int ncell_x, int ncell_y, double* ppn, int* mask, double* stonePtr, double* TotBPtr, double* soilMPtr, double* runoffweight, double rescale)
 {
   double runoff;
   double runoff_coeff;
-
+  double myppt;
 
   int irow, icol;
   irow = blockIdx.y * blockDim.y + threadIdx.y;
@@ -52,16 +40,14 @@ __global__ void calcrunoffweight(int ncell_x, int ncell_y, double* ppn, int* mas
 		  return; // don't calculate if not in catchment(s) of interest
 		  }
   
-  runoff_coeff = (1.0 - 0.0085 * (stonePtr[self])) * exp (-0.0025 * (TotBPtr[self]) / 76.5)	* tanh (0.6 + (soilMPtr[self]) / 0.2);
-  
+    runoff_coeff = (1.0 - 0.0085 * (stonePtr[self])) * exp (-0.0025 * (TotBPtr[self]) / 76.5)	* tanh (0.6 + (soilMPtr[self]) / 0.2);
  // runoff_coeff = (1.0 - 0.0085 * (stonePtr[self])) * exp (-0.0025 * (TotBPtr[self]) / 76.5)	; // newer version is simplified?
-   
-    //runoff = (ppn[self] * 0.001) * runoff_coeff; // ppn/1000 is depth of rain in m, runoff is therefore a depth in m
-    runoff = ( 600 * 0.001) * runoff_coeff; // ppn/1000 is depth of rain in m, runoff is therefore a depth in m
-    runoffweight[self] = runoff; // runoff; //* rescale; //actual runoff depth per cell in m altered 14/01/16
-
-
-  soilMPtr[self] += (ppn[self]/1000) * (1. - runoff_coeff);
+ 
+	myppt = ppn[self] / 1000;// ppn/1000 is depth of rain in m, runoff is therefore a depth in m
+		
+	runoffweight[self] = myppt * runoff_coeff;
+	
+	soilMPtr[self] += myppt * (1. - runoff_coeff);
 
 	if ((soilMPtr[self]) > 0.5)
 				{
@@ -70,7 +56,6 @@ __global__ void calcrunoffweight(int ncell_x, int ncell_y, double* ppn, int* mas
 	if (runoffweight[self] == 0) printf("weight = 0 IN CATCHMENT");
 	
 }
-
 
 
 int computeRunOffWeights(Data* data, Data* device)
