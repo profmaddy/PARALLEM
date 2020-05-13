@@ -29,7 +29,7 @@ int readgrid(Data* data);
 int write_float(Data *data, float *grid, char *filename);
 int write_int(Data *data, int *grid, char *filename);
 int write_double(Data *data, double *grid, char *filename);
-
+void writegrids(Data* data, int iteration);
 int writeSummaryDataToFile(Data* data, int iteration);
 int ReadClimateDataFromFile(Data* data);
 

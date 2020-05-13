@@ -176,6 +176,38 @@ int write_double(Data *data, double *grid, char *filename)
     return 0;
 }
 
+void writegrids(Data* data, int iteration)
+{
+	// Write the recalculated DEM
+	sprintf(data->heightfile, "%s/%d_height.asc", data->matrixDIR, iteration);
+	sprintf(data->FDfile, "%s/%d_MFD.asc", data->matrixDIR, iteration);
+	sprintf(data->FAfile, "%s/%d_FA.asc", data->matrixDIR, iteration);
+	sprintf(data->erofile, "%s/%d_ero.asc", data->matrixDIR, iteration);
+	sprintf(data->incifile, "%s/%d_inci.asc", data->matrixDIR, iteration);
+	sprintf(data->gelifile, "%s/%d_geli.asc", data->matrixDIR, iteration);
+	sprintf(data->depofile, "%s/%d_depo.asc", data->matrixDIR, iteration);
+	sprintf(data->slopefile, "%s/%d_slope.asc", data->matrixDIR, iteration);
+	sprintf(data->Precipfile, "%s/%d_precip.asc", data->matrixDIR, iteration);
+	sprintf(data->Tempfile, "%s/%d_temp.asc", data->matrixDIR, iteration);
+	sprintf(data->soilTfile, "%s/%d_soilT.asc", data->matrixDIR, iteration);
+	
+	if ((iteration % 10) == 0)
+	{
+		write_int(data, data->fd, data->heightfile);
+		write_double(data, data->fa, data->FAfile);
+		write_double(data, data->dem, data->FDfile);
+	}
+
+	if ((iteration % 20) == 0)
+	{
+		write_double(data, data->eroPtr, data->erofile);
+		write_double(data, data->inciPtr, data->incifile);
+		write_double(data, data->geliPtr, data->gelifile);
+		write_double(data, data->depoPtr, data->depofile);
+	}
+}
+
+
 int writeSummaryDataToFile(Data* data, int iteration)
 {
 FILE* out1;
@@ -355,30 +387,31 @@ void readinpar(Data* data, const char* file)
 		  stripblank(data->dummystring, data->modelcode);
 		  choppy(data->modelcode);
 
-	      // use model code to setup output files and directory
-	      sprintf(fname1, "%s_logfile.txt",  data->modelcode);
-		  data->logfileOut = fname1;
-	      
-		  sprintf(fname2, "%s_budgets.csv", data->modelcode);
-		  data->outfilename= fname2;
-          
-		  data->matrixDIR= data->modelcode;
+		  data->matrixDIR = data->modelcode;
 
 		  /*
-          DIR* dir = opendir(data->matrixDIR);
-          if (dir)
-          {
-              // Directory exists. //
-              closedir(dir);
-          }
-          else if (ENOENT == errno)
-          {
-        	  printf("\n\nOutput directory %s does not exist\n", data->matrixDIR);
-        	  exit(0);
-          } */
+			  DIR* dir = opendir(data->matrixDIR);
+			  if (dir)
+			  {
+				  // Directory exists. //
+				  closedir(dir);
+			  }
+			  else if (ENOENT == errno)
+			  {
+				  printf("\n\nOutput directory %s does not exist\n", data->matrixDIR);
+				  exit(0);
+			  }
+		  */
 
 		  printf("%d\n", dirExists(data->matrixDIR));
 
+	      // use model code to setup output files and directory
+	      sprintf(fname1, "%s/%s_logfile.txt", data->matrixDIR, data->modelcode);
+		  data->logfileOut = fname1;
+	      
+		  sprintf(fname2, "%s/%s_budgets.csv", data->matrixDIR, data->modelcode);
+		  data->outfilename= fname2;
+          
  	      //#Initial DEM file
 	      strncpy(data->dummystring, data->lines[parcount], 39);	      parcount++ ;
           stripblank(data->dummystring, data->demfile);

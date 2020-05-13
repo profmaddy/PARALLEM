@@ -49,7 +49,7 @@ void setdevicespace_FD(Data* data, Data* device)
 	 checkCudaErrors( cudaMalloc((void**)&(device->lowHeight),      fullsize * sizeof(double)) );
 	 checkCudaErrors( cudaMalloc((void**)&(device->watershed_id),     fullsize * sizeof(int))    );
 	 checkCudaErrors( cudaMalloc((void**)&(device->flatmask),     fullsize * sizeof(int))    );
-	  fprintf(data->outlog, "FD: setdevicespace0:%s\n", cudaGetErrorString(cudaGetLastError()));
+	 fprintf(data->outlog, "FD: setdevicespace0:%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	 checkCudaErrors( cudaMalloc((void**)&(device->Slopes), doublefull) );
 	 checkCudaErrors( cudaMalloc((void**)&(device->prop),   doublefull) );
@@ -161,6 +161,7 @@ void setdevicespace_Process(Data* data, Data* device)
 
 	checkCudaErrors( cudaMalloc( (void**) &device->fa,       full_size * sizeof(double)) );
 	checkCudaErrors( cudaMalloc( (void**) &device->fd,       full_size * sizeof(int))    );
+	checkCudaErrors( cudaMalloc( (void**) &device->SFD,      full_size * sizeof(int))    );
 
 	checkCudaErrors( cudaMalloc( (void**) &device->dz,       full_size * sizeof(double)) ); // create room for product dz
 	checkCudaErrors( cudaMalloc( (void**) &device->finesPtr, full_size * sizeof(double)) );
@@ -174,15 +175,13 @@ void setdevicespace_Process(Data* data, Data* device)
 	checkCudaErrors( cudaMalloc( (void**) &device->weatherC, full_size * sizeof(double)) );
 	checkCudaErrors( cudaMalloc( (void**) &device->weatherP, full_size * sizeof(double)) );
 
-
 		fprintf(data->outlog, "MOD: setdevicespace_Process :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-
-		// stones, TotBio, soilM plus dem, slope and mask still on device
+		// stones, TotBio, soilM plus dem, slopes and mask still on device
 		checkCudaErrors( cudaMemcpy ( device->fa,       data->fa,         full_size * sizeof(double), cudaMemcpyHostToDevice) );
-		checkCudaErrors( cudaMemcpy ( device->fd,       data->SFD,         full_size * sizeof(int),    cudaMemcpyHostToDevice) );
-
-	//	checkCudaErrors( cudaMemcpy ( device->SlopePtr,  data->SlopePtr,  full_size * sizeof(double), cudaMemcpyHostToDevice) );
+		checkCudaErrors( cudaMemcpy ( device->fd,       data->fd,         full_size * sizeof(int),    cudaMemcpyHostToDevice) );
+		checkCudaErrors( cudaMemcpy ( device->SFD,      data->fd,         full_size * sizeof(int),    cudaMemcpyHostToDevice) );
+		checkCudaErrors( cudaMemcpy ( device->SlopePtr,  data->SlopePtr,  full_size * sizeof(double), cudaMemcpyHostToDevice) );
 
 		checkCudaErrors( cudaMemcpy ( device->finesPtr, data->finesPtr,   full_size * sizeof(double), cudaMemcpyHostToDevice) );
 		checkCudaErrors( cudaMemcpy ( device->soilTPtr, data->soilTPtr,   full_size * sizeof(double), cudaMemcpyHostToDevice) );
@@ -193,12 +192,8 @@ void setdevicespace_Process(Data* data, Data* device)
 		checkCudaErrors( cudaMemcpy ( device->inciPtr,  data->inciPtr,    full_size * sizeof(double), cudaMemcpyHostToDevice) );
 		checkCudaErrors( cudaMemcpy ( device->depoPtr,  data->depoPtr,    full_size * sizeof(double), cudaMemcpyHostToDevice) );
 
-
 		checkCudaErrors( cudaMemcpy ( device->weatherC,  data->weatherC,    full_size * sizeof(double), cudaMemcpyHostToDevice) );
 		checkCudaErrors( cudaMemcpy ( device->weatherP,  data->weatherP,    full_size * sizeof(double), cudaMemcpyHostToDevice) );
-
-
-		checkCudaErrors( cudaMemcpy ( device->SlopePtr,  data->SlopePtr,  full_size * sizeof(double), cudaMemcpyHostToDevice) );
 
 		fprintf(data->outlog, "MOD: Matrix memcopy operations :%s\n", cudaGetErrorString(cudaGetLastError()));
 
@@ -216,6 +211,7 @@ void cleardevicespace_Process(Data* data, Data* device)
 	cudaFree(device->fdmod);
 
 	cudaFree(device->Slopes);
+	cudaFree(device->SlopePtr);
 	cudaFree(device->prop);
 
 	cudaFree(device->rainmat);
@@ -311,8 +307,6 @@ void createDeviceSpace(Data* data, Data* device)
 	  checkCudaErrors( cudaMalloc((void **)&(device->dem), fullsize * sizeof(double)) );
 	  checkCudaErrors( cudaMalloc((void **)&(device->SlopePtr), fullsize * sizeof(double)) );
 	  checkCudaErrors( cudaMalloc((void **)&(device->summary), fullsize * sizeof(double)) );
-
-	  //checkCudaErrors( cudaMalloc((void**)&(device->Slopes), fullsize * 9 * sizeof(double)) );
 
 	fprintf(data->outlog,"Allocated DEM and slope matrices on device :%s\n", cudaGetErrorString(cudaGetLastError()));
 

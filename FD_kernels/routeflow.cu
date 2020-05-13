@@ -729,7 +729,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors(cudaMemcpy((void *) device->dx, data->dx, 9 * sizeof(int), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->dy, data->dy, 9 * sizeof(int), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->dem, data->dem, fullsize * sizeof(double), cudaMemcpyHostToDevice) );
-  checkCudaErrors(cudaMemcpy((void *) device->SlopePtr, data->SlopePtr, fullsize * sizeof(double), cudaMemcpyHostToDevice) ); //new 30/01/16
+  //checkCudaErrors(cudaMemcpy((void *) device->SlopePtr, data->SlopePtr, fullsize * sizeof(double), cudaMemcpyHostToDevice) ); //new 30/01/16
   checkCudaErrors(cudaMemcpy((void *) device->Slopes, data->Slopes, 8* fullsize * sizeof(double), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->prop, data->prop, 8* fullsize * sizeof(double), cudaMemcpyHostToDevice) );
 

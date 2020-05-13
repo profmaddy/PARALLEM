@@ -71,6 +71,7 @@ __global__ void diff_erosion(int *mask, double *ePtr_d, double *FAPtr_d, double 
 		OF = Qthreshold;
 
 	double slope = (SlopePtr_d[self]);
+	if (slope == 0.0) slope = 0.0001;
 
 	//slope constraint placed back on 3/10/18
 	if (slope > 5.0) slope = 5.0;
