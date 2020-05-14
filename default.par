@@ -1,11 +1,11 @@
 PARALLEM PARAMETER FILE
-07/04/2020
-testmod
-30mfam.asc			
-climateF.txt
-soilT.tif
+14/05/2020
+testmod                                 #
+30mfam.asc                              #
+climateF.txt                            #
+soilT.tif                               #
 0                                       #restart 0=no otherwise yes
-0                                       start value (set to restart value if required
+0                                       #start value (set to restart value if required
 1                                       #Final iteration
 10                                   	#runin iterations required
 1                                       #flow routing 0=SFD oherwise MFD

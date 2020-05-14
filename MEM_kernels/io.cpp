@@ -32,11 +32,12 @@ int readgrid(Data* data)
     int x,y,z;
     int cell;
 
+	//printf("%s", data->demfile);
     FILE *in = fopen(data->demfile, "r");
 	//FILE* in = fopen("30mfam.asc", "r");
 	if(in == NULL) {
 		perror("Cannot open file: ");
-		return 1;
+		exit(0);
 	}
 
 /* typical header looks like this
@@ -107,12 +108,19 @@ int write_float(Data *data, float *grid, char *filename)
 
     for (x = 0; x < (data->mapInfo.height); ++x)
     {
-    	for (y= 0; y < data->mapInfo.width; ++y)
-			{
-    		cell = 	x*data->mapInfo.width + y;
-			fprintf(out, "%lf ", grid[cell]);
+		for (y = 0; y < data->mapInfo.width; ++y)
+		{
+			cell = x * data->mapInfo.width + y;
+			if (data->mask[cell] == 1) 
+				{ 
+					fprintf(out, "%f ", grid[cell]); 
+				}
+			else 
+				{
+					fprintf(out, "%d ", -9999);
+				}
 		
-			}
+		}
     	fprintf(out,"\n");
     }
     fclose(out);
@@ -139,7 +147,14 @@ int write_int(Data *data, int *grid, char *filename)
     	for (y= 0; y < data->mapInfo.width; ++y)
 			{
     		cell = 	x*data->mapInfo.width + y;
-			fprintf(out, "%d ", grid[cell]);
+			if (data->mask[cell] == 1)
+				{
+					fprintf(out, "%d ", grid[cell]);
+				}
+			else
+				{
+					fprintf(out, "%d ", -9999);
+				}
 			}
     	fprintf(out,"\n");
     }
@@ -167,7 +182,14 @@ int write_double(Data *data, double *grid, char *filename)
     	for (y= 0; y < data->mapInfo.width; ++y)
 			{
     		cell = 	x*data->mapInfo.width + y;
-			fprintf(out, "%lf ", grid[cell]);
+			if (data->mask[cell] == 1)
+				{
+					fprintf(out, "%lf ", grid[cell]);
+				}
+			else
+				{
+					fprintf(out, "%d ", -9999);
+				}
 			}
     	fprintf(out,"\n");
     }
@@ -180,7 +202,7 @@ void writegrids(Data* data, int iteration)
 {
 	// Write the recalculated DEM
 	sprintf(data->heightfile, "%s/%d_height.asc", data->matrixDIR, iteration);
-	sprintf(data->FDfile, "%s/%d_MFD.asc", data->matrixDIR, iteration);
+	sprintf(data->FDfile, "%s/%d_FD.asc", data->matrixDIR, iteration);
 	sprintf(data->FAfile, "%s/%d_FA.asc", data->matrixDIR, iteration);
 	sprintf(data->erofile, "%s/%d_ero.asc", data->matrixDIR, iteration);
 	sprintf(data->incifile, "%s/%d_inci.asc", data->matrixDIR, iteration);
@@ -191,14 +213,14 @@ void writegrids(Data* data, int iteration)
 	sprintf(data->Tempfile, "%s/%d_temp.asc", data->matrixDIR, iteration);
 	sprintf(data->soilTfile, "%s/%d_soilT.asc", data->matrixDIR, iteration);
 	
-	if ((iteration % 10) == 0)
+	if ((iteration % 5) == 0)
 	{
-		write_int(data, data->fd, data->heightfile);
+		write_int(data, data->fd, data->FDfile);
 		write_double(data, data->fa, data->FAfile);
-		write_double(data, data->dem, data->FDfile);
+		write_double(data, data->dem, data->heightfile);
 	}
 
-	if ((iteration % 20) == 0)
+	if ((iteration % 5) == 0)
 	{
 		write_double(data, data->eroPtr, data->erofile);
 		write_double(data, data->inciPtr, data->incifile);
@@ -373,17 +395,17 @@ void readinpar(Data* data, const char* file)
 		  int parcount = 0;
 
           //#What is this file
-		  strncpy(s, data->lines[parcount], 39);
-		  choppy(s); // removbe the \n from the string
+		  strncpy_s(s, 39, data->lines[parcount], 38);
+		  //choppy(s); // removbe the \n from the string
 	      printf("\n\n%s\n",s );	      parcount++ ;
 
 	      //#Date of file
-	      strncpy(s, data->lines[parcount], 39);
+	      strncpy_s(s, 39, data->lines[parcount], 38);
 		  choppy(s);
 	      printf("%s\n",s );	      parcount++ ;
 
 	      //#model identifier
-	      strncpy(data->dummystring, data->lines[parcount], 39);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 38);	      parcount++ ;
 		  stripblank(data->dummystring, data->modelcode);
 		  choppy(data->modelcode);
 
@@ -413,135 +435,136 @@ void readinpar(Data* data, const char* file)
 		  data->outfilename= fname2;
           
  	      //#Initial DEM file
-	      strncpy(data->dummystring, data->lines[parcount], 39);	      parcount++ ;
+		  char temp[39];
+		  strncpy_s(data->dummystring, 39, data->lines[parcount], 38);	      parcount++ ;
           stripblank(data->dummystring, data->demfile);
 		  choppy(data->demfile);
 
 	      //#climate filename
-	      strncpy(data->dummystring, data->lines[parcount], 39);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 38);	      parcount++ ;
           stripblank(data->dummystring, data->clim_file);
 		  choppy(data->clim_file);
 
 	      //#bedrock filename
-	      strncpy(data->dummystring, data->lines[parcount], 39);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 38);	      parcount++ ;
           stripblank(data->dummystring, data->bedrockfile);
 		  choppy(data->bedrockfile);
 
 	      //restart yes(1) or no(0)
-	      strncpy(data->dummystring, data->lines[parcount], 39);          parcount++ ;
-	      data->restart= atoi(data->dummystring);
-		  
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 10);          parcount++ ;
+		  data->restart = (int)strtol(data->dummystring, (char**)NULL, 10);
 
-	      //start iteration
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->start_iter= atoi(data->dummystring);              	      parcount++ ;
+		  //start iteration
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 10); parcount++;
+	      data->start_iter = (int)strtol(data->dummystring, (char**)NULL, 10);
 
 	       //#finish iteration (Max iteration)
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->max_iterations = atoi(data->dummystring);	         parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 10); parcount++;
+	      data->max_iterations = (int)strtol(data->dummystring, (char**)NULL, 10);
 
 	      //#number of runin iterations
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->runiniter = atoi(data->dummystring);            	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 10); parcount++;
+	      data->runiniter = (int)strtol(data->dummystring, (char**)NULL, 10);
 
 	      //flow direction type
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->flowdirectiontype= atoi(data->dummystring);              	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 10); parcount++;
+	      data->flowdirectiontype= (int)strtol(data->dummystring, (char**)NULL, 10);
+		  printf("flowdirectiontype %d \n", data->flowdirectiontype);
 
           //#rain for runin
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->rain = strtod(data->dummystring, NULL);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->rain = strtod(data->dummystring, NULL);
 
 	      //#temperature for runin
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->temp = strtod(data->dummystring, NULL);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->temp = strtod(data->dummystring, NULL);
 
 	  	  // stonePtr
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->stoneval = strtod(data->dummystring, NULL);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->stoneval = strtod(data->dummystring, NULL);
 
 	  	  // finePtr
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->fineval = strtod(data->dummystring, NULL);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->fineval = strtod(data->dummystring, NULL);
 
 	  	 // soil structure
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->soil_struct= atoi(data->dummystring);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->soil_struct= (int)strtol(data->dummystring, (char**)NULL, 10);
 
 	  	 // soil permeability
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->profile_permeability= atoi(data->dummystring);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->profile_permeability= (int)strtol(data->dummystring, (char**)NULL, 10);
 
 	  	 // soil thickness
-	      strncpy(data->dummystring, data->lines[parcount], 39);
-	      data->soilTval = strtod(data->dummystring, NULL);	      parcount++ ;
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20); parcount++;
+	      data->soilTval = strtod(data->dummystring, NULL);
 
 	  	 // soil moisture
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->soilMval = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // soil organics (bio)
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->soilBval = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // soil nutrients
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->nutval = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // Q threshold
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->Qthreshold = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // gelifluction slope threshold
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->Gslope = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // gelifluction kappa
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->kappa = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	  // geliflucution Gflowlim
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->Gflowlim = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // Flow A
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->Flow_A = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // Flow B
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->Flow_B = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // maximum incision
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->max_incision = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	// dummy3
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->dummy3 = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // dummy4
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->dummy4 = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // Diffused ddk
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->ddk = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // Concentrated dck
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->dck = strtod(data->dummystring, NULL);	      parcount++ ;
 
 	  	 // Gelifluction dgk
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 	      data->dgk = strtod(data->dummystring, NULL);	      parcount++ ;
 
 		 // temp_inflex for vegetation growth
-	      strncpy(data->dummystring, data->lines[parcount], 39);
+	      strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 		  data->temp_inflex = strtod(data->dummystring, NULL);		  parcount++ ;
 
 	    // temp_sesitivity for vegetation growth
-		  strncpy(data->dummystring, data->lines[parcount], 39);
+		  strncpy_s(data->dummystring, 39, data->lines[parcount], 20);
 		  data->temp_sens = strtod(data->dummystring, NULL);		  parcount++ ;
 
 	  printf("All %d parameters read from file\n", parcount);

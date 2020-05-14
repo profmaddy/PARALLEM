@@ -27,8 +27,6 @@ int main(int argc, char* argv[]) {
 	if (!pars) pars = "default.par"; // use the default values
 	createfilenamespace(&data);
 	readinpar(&data, pars);
-	data.demfile = "30mfamA.txt";
-	//data.demfile = "pal25_bi20mod.asc";
 	checkparread(&data);
 
 	// output file for  data used in debugging
@@ -68,7 +66,7 @@ int main(int argc, char* argv[]) {
 			
 	createDeviceSpace(&data, &device);
 	modelruntype = 0;
-	data.start_iter = -100;
+	data.start_iter = -10;
 
 	/************* START OF MAIN LOOP *********************/
 	//for (int i = start_pos_sim; i < last_pos_sim; i++) {

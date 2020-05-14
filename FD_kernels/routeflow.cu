@@ -934,10 +934,20 @@ void cuFlowDirection(Data* data, Data* device, int iter)
      checkCudaErrors(cudaMemcpy((void*)data->fd, device->fd, sizeof(int)* fullsize, cudaMemcpyDeviceToHost));     
      checkdir(data, data->SFD);
      for (int i = 0; i < fullsize; i++) {
-         if ((data->fd[i] <= 0) && (data->mask[i] == 1)) 
-             //if ((data->mask[i] == 1))
+         if ((data->mask[i] == 1))
          {
-             data->fd[i] = data->SFD[i];
+             if (data->flowdirectiontype == 0) // for SFD
+             {
+                 data->fd[i] = data->SFD[i];
+             }
+
+             if (data->flowdirectiontype == 1) // for MFD
+             {
+                 if ((data->fd[i] <= 0) && (data->mask[i] == 1))
+                 {
+                     data->fd[i] = data->SFD[i];
+                 }
+             }
          }
      }
      
