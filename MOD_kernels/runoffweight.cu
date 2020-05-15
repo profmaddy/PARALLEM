@@ -112,6 +112,38 @@ int computeRunOffWeights(Data* data, Data* device)
 	return 1;
 }
 
+void calcpropsSFD(Data* data) 
+{
+	int width = data->mapInfo.width;
+	int height = data->mapInfo.height;
+	int fullsize = width * height;
+	int idx;
+
+	for (int i = 0; i < fullsize; i++)
+	{
+		idx = i * 8;
+		for (int k = 0; k < 8; k++)
+		{
+			data->prop[i] = 0;
+		}
+
+		if (data->mask[i] == 1)
+		{
+			{
+				if (data->fd[i] == 1)   data->prop[idx + 2] = 1;
+				if (data->fd[i] == 2)   data->prop[idx + 3] = 1;
+				if (data->fd[i] == 4)   data->prop[idx + 4] = 1;
+				if (data->fd[i] == 8)   data->prop[idx + 5] = 1;
+				if (data->fd[i] == 16)  data->prop[idx + 6] = 1;
+				if (data->fd[i] == 32)  data->prop[idx + 7] = 1;
+				if (data->fd[i] == 64)  data->prop[idx + 0] = 1;
+				if (data->fd[i] == 128) data->prop[idx + 1] = 1;
+			}
+		}
+	}
+}
+
+
 void calcprops(Data* data) {
 
 	double slopetot;

@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
 
 	createProcessMatrices(&data); // allocate sufficient memory on host
 	setProcessMatrices(&data);  // initialise values for attributes on host based upon parameter file inputs
+	createDeviceSpace(&data, &device);
 
 	/// Perform the iterations
     printf("Performing the simulation\n");
@@ -63,7 +64,7 @@ int main(int argc, char* argv[]) {
     int start_pos_sim = data.start_iter - data.runiniter;
     int last_pos_sim = data.max_iterations;
 
-	data.start_iter = -100;
+	data.start_iter = -4;
 
 	/************* START OF MAIN LOOP *********************/
 	//for (int i = start_pos_sim; i < last_pos_sim; i++) {
@@ -86,12 +87,13 @@ int main(int argc, char* argv[]) {
 		setdevicespace_FA(&data, &device);  // load matrices for runoffweight calculation
 		 computeRunOffWeights(&data, &device); // calculate runoff
 		 calcwater(&data);
-		 calcprops(&data); 
+		 calcpropsSFD(&data);
+		 //calcprops(&data); 
 		 correctmfdflow(&data, &device, i); // calculate flow accumulation (MFD)
 		cleardevicespace_FA(&data, &device);
 
 	    setdevicespace_Process(&data, &device);
-	     erosionGPU(&data, &device, i);
+	     //erosionGPU(&data, &device, i);
 		cleardevicespace_Process(&data, &device);
 		
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration
@@ -105,7 +107,7 @@ int main(int argc, char* argv[]) {
 		fprintf(data.outlog,"Finished Iteration %d\n", i);
 		fflush(data.outlog);
 
-		//writegrids(&data, i);
+		writegrids(&data, i);
 
 	} // end of iterations ****************************************************
 

@@ -726,7 +726,6 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   data->watershed_id = (int*) malloc(ncell_x * ncell_y * sizeof(int));
   fprintf(data->outlog, "FD: dev mem allocate shortest_path, fdmod, watershed_id :%s\n", cudaGetErrorString(cudaGetLastError()));
 
-
   checkCudaErrors(cudaMemcpy((void *) device->dx, data->dx, 9 * sizeof(int), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->dy, data->dy, 9 * sizeof(int), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->dem, data->dem, fullsize * sizeof(double), cudaMemcpyHostToDevice) );
@@ -940,6 +939,9 @@ void cuFlowDirection(Data* data, Data* device, int iter)
              if (data->flowdirectiontype == 0) // for SFD
              {
                  data->fd[i] = data->SFD[i];
+
+                 if (data->fd[i] == 0) data->SFD[i] = 16; //printf("we have a zero fd in the grid at location %d \n", i);
+
              }
 
              if (data->flowdirectiontype == 1) // for MFD

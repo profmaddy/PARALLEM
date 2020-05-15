@@ -8,7 +8,7 @@ soilT.tif                               #
 0                                       #start value (set to restart value if required
 1                                       #Final iteration
 10                                   	#runin iterations required
-1                                       #flow routing 0=SFD oherwise MFD
+0                                       #flow routing 0=SFD oherwise MFD
 600.0                                   #initial rain (for runin)
 10.0                                    #initial temperature (for runin)
 20.0                                    #stone
