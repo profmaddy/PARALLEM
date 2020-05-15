@@ -346,6 +346,7 @@ void calcwater(Data* data)
 	}
 
 	printf("Total amount of water in grid for runoff = %lf \n", sumwater);
+	fprintf(data->outlog,"Total amount of water in grid for runoff = %lf \n", sumwater);
 
 }
 

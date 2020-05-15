@@ -185,8 +185,6 @@ int setProcessMatrices(Data* data)
     }
 
 
-  // data->outletcellidx = 0;// already set
-
   printf("All process grids now allocated \n\n");
 
   fprintf(data->outlog, "All process grids now allocated and default values set \n\n");

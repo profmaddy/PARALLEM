@@ -213,11 +213,11 @@ void writegrids(Data* data, int iteration)
 	sprintf(data->Tempfile, "%s/%d_temp.asc", data->matrixDIR, iteration);
 	sprintf(data->soilTfile, "%s/%d_soilT.asc", data->matrixDIR, iteration);
 	
-	if ((iteration % 5) == 0)
+	if ((iteration % 1) == 0)
 	{
 		write_int(data, data->fd, data->FDfile);
 		write_double(data, data->fa, data->FAfile);
-		write_double(data, data->dem, data->heightfile);
+		//write_double(data, data->dem, data->heightfile);
 	}
 
 	if ((iteration % 5) == 0)

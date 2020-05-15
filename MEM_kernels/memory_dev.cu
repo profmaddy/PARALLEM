@@ -53,7 +53,7 @@ void setdevicespace_FD(Data* data, Data* device)
 
 	 checkCudaErrors( cudaMalloc((void**)&(device->Slopes), doublefull) );
 	 checkCudaErrors( cudaMalloc((void**)&(device->prop),   doublefull) );
-	  fprintf(data->outlog, "FD: setdevicespace1:%s\n", cudaGetErrorString(cudaGetLastError()));
+	 fprintf(data->outlog, "FD: setdevicespace1:%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	  cudaMemGetInfo(&freenow, &total);
 	  fprintf(data->outlog, "Memory on CUDA card free after FD space allocated: %zd total: %zd \n",freenow/1024,total/1024);
@@ -211,7 +211,7 @@ void cleardevicespace_Process(Data* data, Data* device)
 	cudaFree(device->fdmod);
 
 	cudaFree(device->Slopes);
-	cudaFree(device->SlopePtr);
+	//cudaFree(device->SlopePtr); // do not free here as it will not be redeclared.
 	cudaFree(device->prop);
 
 	cudaFree(device->rainmat);
@@ -301,8 +301,7 @@ void createDeviceSpace(Data* data, Data* device)
 	 int ncell_y = data->mapInfo.height;
 	 fullsize= ncell_x * ncell_y;
 
-	// cudaSetDevice(0);
-	 fprintf(data->outlog,"set device to zero :%s\n", cudaGetErrorString(cudaGetLastError()));
+	 //cudaDeviceReset();
 
 	  checkCudaErrors( cudaMalloc((void **)&(device->dem), fullsize * sizeof(double)) );
 	  checkCudaErrors( cudaMalloc((void **)&(device->SlopePtr), fullsize * sizeof(double)) );
@@ -338,7 +337,7 @@ int clearDeviceSpace(Data* data, Data* device)
 	fprintf(data->outlog,"Memory on CUDA card free after DEM and slope device grids space freed: %zd total: %zd \n",freenow/1024,total/1024);
 
 
-	free(data->watershed_id);
+
 
 
 	return 0;

@@ -62,11 +62,8 @@ int main(int argc, char* argv[]) {
 
     int start_pos_sim = data.start_iter - data.runiniter;
     int last_pos_sim = data.max_iterations;
-    int first_iter = start_pos_sim;
-			
-	createDeviceSpace(&data, &device);
-	modelruntype = 0;
-	data.start_iter = -10;
+
+	data.start_iter = -100;
 
 	/************* START OF MAIN LOOP *********************/
 	//for (int i = start_pos_sim; i < last_pos_sim; i++) {
@@ -83,7 +80,7 @@ int main(int argc, char* argv[]) {
 		}
 	
 		setdevicespace_FD(&data, &device);
-		 cuFlowDirection(&data, &device, i); // calculate flow direction (MFD)
+		  cuFlowDirection(&data, &device, i); // calculate flow direction (MFD)
 		cleardevicespace_FD(&data, &device);
 
 		setdevicespace_FA(&data, &device);  // load matrices for runoffweight calculation
@@ -95,7 +92,7 @@ int main(int argc, char* argv[]) {
 
 	    setdevicespace_Process(&data, &device);
 	     erosionGPU(&data, &device, i);
-	    cleardevicespace_Process(&data, &device);
+		cleardevicespace_Process(&data, &device);
 		
 		writeSummaryDataToFile(&data,  i); // note summary output is every iteration
 		zerogrids(&data);
@@ -104,10 +101,11 @@ int main(int argc, char* argv[]) {
 
 		cudaMemGetInfo(&freenow, &total);
 		fprintf(data.outlog,"Memory on CUDA card free at end of iteration: %zd total: %zd\n",freenow/1024,total/1024);
+		printf("Memory on CUDA card free at end of iteration: %zd total: %zd\n", freenow / 1024, total / 1024);
 		fprintf(data.outlog,"Finished Iteration %d\n", i);
 		fflush(data.outlog);
 
-		writegrids(&data, i);
+		//writegrids(&data, i);
 
 	} // end of iterations ****************************************************
 

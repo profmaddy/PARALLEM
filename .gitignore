@@ -338,3 +338,13 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/testmod/testmod_logfile.txt
+/testmod/testmod_budgets.csv
+/testmod/-4_FD.asc
+/testmod/-4_FA.asc
+/testmod/-3_FD.asc
+/testmod/-3_FA.asc
+/testmod/-2_FD.asc
+/testmod/-2_FA.asc
+/testmod/-1_FD.asc
+/testmod/-1_FA.asc

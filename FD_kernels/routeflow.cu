@@ -660,6 +660,7 @@ void floodingDriver(dim3 dimGrid, dim3 dimBlock, Data* data, Data* device, int n
 
   delete [] sorted_list;
   delete  set;
+ 
 
   cudaFree(counter_d);
   cudaFree(change_flag_d);
@@ -729,7 +730,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   checkCudaErrors(cudaMemcpy((void *) device->dx, data->dx, 9 * sizeof(int), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->dy, data->dy, 9 * sizeof(int), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->dem, data->dem, fullsize * sizeof(double), cudaMemcpyHostToDevice) );
-  //checkCudaErrors(cudaMemcpy((void *) device->SlopePtr, data->SlopePtr, fullsize * sizeof(double), cudaMemcpyHostToDevice) ); //new 30/01/16
+  checkCudaErrors(cudaMemcpy((void *) device->SlopePtr, data->SlopePtr, fullsize * sizeof(double), cudaMemcpyHostToDevice) ); 
   checkCudaErrors(cudaMemcpy((void *) device->Slopes, data->Slopes, 8* fullsize * sizeof(double), cudaMemcpyHostToDevice) );
   checkCudaErrors(cudaMemcpy((void *) device->prop, data->prop, 8* fullsize * sizeof(double), cudaMemcpyHostToDevice) );
 
@@ -962,6 +963,7 @@ void cuFlowDirection(Data* data, Data* device, int iter)
   free(data->shortest_paths);
   free(data->fdmod);
   free(change_flag_h);
+  free(data->watershed_id);
 
 #ifndef PRODUCTION_RUN
   printf("Time to complete flow routing routine algorithm %.6f s\n", time / 1000.0);
