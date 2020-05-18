@@ -25,7 +25,7 @@
 #define RUNOFFWEIGHT
 
 int computeRunOffWeights(Data* data, Data* device);
-void calcpropsSFD(Data* data);
+void calcpropsSFD(Data* data, Data* device);
 void calcprops(Data* data);
 void calcwater(Data* data);
 

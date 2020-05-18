@@ -103,8 +103,10 @@ int createProcessMatrices(Data* data)
   checkCudaErrors(cudaMallocHost((void **)&data->flatmask, dataSizeInt  ));
 
 // room to store the slopes and proportions in all directions
-  checkCudaErrors(cudaMallocHost((void **)&data->Slopes,  dataSize * 8 ));
-  checkCudaErrors(cudaMallocHost((void **)&data->prop,  dataSize * 8  ));
+  int fullsize8;
+  fullsize8 = dataSize * 8;
+  checkCudaErrors(cudaMallocHost((void **)&data->Slopes,  fullsize8 ));
+  checkCudaErrors(cudaMallocHost((void **)&data->prop,  fullsize8 ));
 
 
   checkCudaErrors(cudaMallocHost((void **)&data->runoffweight, dataSize));

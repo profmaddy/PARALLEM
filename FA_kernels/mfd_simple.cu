@@ -219,7 +219,7 @@ int processtheGrid(Data* data, Data* device, int loopMax, int percent, int gridR
 	        							oneZero = 0;
 	        							oneZero2 = 0;
 	        					}
-            } while ((progressh > 10 ) || (!oneZero2) ); // && ((double) *doneP * 100 / (gridRows * gridColumns)) < 99.0);
+            } while ((progressh > 5 ) || (!oneZero2) ); // && ((double) *doneP * 100 / (gridRows * gridColumns)) < 99.0);
 
 	        checkCudaErrors(cudaMemcpy(progressd, &progressh, sizeof(progressh), cudaMemcpyHostToDevice) );
 	        loop++;
@@ -261,7 +261,7 @@ void correctmfdflow(Data* data, Data* device, int iter)
    doublefull = fullsize * sizeof(double) * 8;
 
    cudaMemcpy(device->fa, data->fa, fullsize * sizeof(double), cudaMemcpyHostToDevice);
-   checkCudaErrors(cudaMemcpy(device->prop, data->prop, doublefull, cudaMemcpyHostToDevice));
+   // checkCudaErrors(cudaMemcpy(device->prop, data->prop, doublefull, cudaMemcpyHostToDevice));
 
 
   fflush(data->outlog);
@@ -302,7 +302,7 @@ void correctmfdflow(Data* data, Data* device, int iter)
     printf("%d / %d (%f %%)\n", totalGP, data->activecells, (double) totalGP / data->activecells * 100);
     /* ---- end of second run ---- */
     loop ++;
-  } while ((gridprogress > 0));// && (((double)totalGP / (nrows * ncols)) < 0.99));
+  } while ((gridprogress > 5));// && (((double)totalGP / (nrows * ncols)) < 0.99));
 
 #ifndef PRODUCTION_RUN
   printf("About to finish FA_MFD\n");
@@ -369,7 +369,7 @@ void correctmfdflow(Data* data, Data* device, int iter)
   				}
   		}
   	}
-  	fprintf(data->outlog, "FA: Bad value count (i.e. not in catchment(s) = %d\n", count);
+  fprintf(data->outlog, "FA: Bad value count (i.e. not in catchment(s) = %d\n", count);
   free(okgrid);
   free(localOK);
   cudaFree(device->slopetotal); // remove slopes grid from GPU

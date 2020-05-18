@@ -62,13 +62,13 @@ class union_set
         void merge(int a, int b);
 };
 
-__global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, int *SFD, double *prop, int *mfd, int flowtype, int cell_size, int ncell_x, int ncell_y, int *dx, int *dy, int last,int *sinkcounter, int *flatcounter);
+__global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, int *SFD, int *mfd, int flowtype, int cell_size, int ncell_x, int ncell_y, int *dx, int *dy, int last,int *sinkcounter, int *flatcounter);
 
 __global__ void flow_boundaryMFD( int *mask, double *zs, double *slopes, int *SFD, int *mfd, int ncell_x, int ncell_y);
 
 __global__ void shortest_paths_plateaus_initMFD(int *mask, double *zs, int *fd, int* SFD, float* shortest_paths, int cell_size, int ncell_x, int ncell_y, double *lowHeight);
 
-__global__ void route_plateausMFD(int *mask, double *zs, double*slopes, double*props, int *fd, int* SFD, float* shortest_paths,	int ncell_x, int ncell_y, int *dx, int *dy, int *change_flag, double *lowHeight);
+__global__ void route_plateausMFD(int *mask, double *zs, double*slopes, int *fd, int* SFD, float* shortest_paths,	int ncell_x, int ncell_y, int *dx, int *dy, int *change_flag, double *lowHeight);
 
 __global__ void init_watershedMFD(int *mask, int *SFD, int *watershed_id, double *zs, float *shortest_paths, int *dx, int *dy, int *counter, int ncell_x, int ncell_y);
 

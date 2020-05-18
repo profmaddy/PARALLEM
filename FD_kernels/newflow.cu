@@ -46,7 +46,7 @@ __device__ int look(int client, int nghbr, int gridCols)
 
 //called FlowDirs<<<dimGrid, dimBlock>>>(device->mask, device->flatmask, device->dem, device->Slopes, device->SFD, device->prop, device->fd, 1, csize, ncell_x, ncell_y, device->dx, device->dy, 0);
 
-__global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, int *SFD, double *prop, int *mfd, int flowtype, int cell_size, int ncell_x, int ncell_y, int *dx, int *dy, int last, int *sinkcounter, int *flatcounter)
+__global__ void FlowDirs(int *mask, int *flatmask, double *zs, double *slopes, int *SFD, int *mfd, int flowtype, int cell_size, int ncell_x, int ncell_y, int *dx, int *dy, int last, int *sinkcounter, int *flatcounter)
 {
   int cellx, celly;
   int icol, irow, dcell;
@@ -261,7 +261,7 @@ __global__ void shortest_paths_plateaus_initMFD(int *mask, double *zs, int *fd, 
 // find the cell around self which has same height and a lower distance to the exit
 // route to that cell
 
-__global__ void route_plateausMFD(int *mask, double *zs, double *slopes, double *props, int *fd, int* SFD, float* shortest_paths,
+__global__ void route_plateausMFD(int *mask, double *zs, double *slopes, int *fd, int* SFD, float* shortest_paths,
 				int ncell_x, int ncell_y, int *dx, int *dy, int *change_flag, double *lowHeight)
 {
 	int irow, icol, dcell, cellx, celly;

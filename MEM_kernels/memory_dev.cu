@@ -51,8 +51,8 @@ void setdevicespace_FD(Data* data, Data* device)
 	 checkCudaErrors( cudaMalloc((void**)&(device->flatmask),     fullsize * sizeof(int))    );
 	 fprintf(data->outlog, "FD: setdevicespace0:%s\n", cudaGetErrorString(cudaGetLastError()));
 
-	 checkCudaErrors( cudaMalloc((void**)&(device->Slopes), doublefull) );
-	 checkCudaErrors( cudaMalloc((void**)&(device->prop),   doublefull) );
+	 //checkCudaErrors( cudaMalloc((void**)&(device->Slopes), doublefull) );
+	 //checkCudaErrors( cudaMalloc((void**)&(device->prop),   doublefull) );
 	 fprintf(data->outlog, "FD: setdevicespace1:%s\n", cudaGetErrorString(cudaGetLastError()));
 
 	  cudaMemGetInfo(&freenow, &total);
@@ -68,9 +68,6 @@ void cleardevicespace_FD(Data* data, Data* device)
 
 		cudaFree(device->fd);
 		cudaFree(device->SFD);
-		// cudaFree(device->Slopes); //keep on device
-		// cudaFree(device->prop); //keep on device
-
 		cudaFree(device->dx);
 		cudaFree(device->dy);
 		cudaFree(device->shortest_paths);
@@ -90,6 +87,8 @@ void setdevicespace_FA(Data* data, Data* device)
 	int ncell_x = data->mapInfo.width;
 	int ncell_y = data->mapInfo.height;
 	full_size= ncell_x * ncell_y;
+	int full_size8;
+	full_size8 = full_size * 8 * sizeof(double);
 
 	checkCudaErrors( cudaMalloc( (void**) &device->runoffweight, full_size * sizeof(double)) );
 
@@ -99,18 +98,18 @@ void setdevicespace_FA(Data* data, Data* device)
 	checkCudaErrors( cudaMalloc( (void**) &device->fa, full_size * sizeof(double)) );
 	checkCudaErrors( cudaMalloc( (void**) &device->fd, full_size * sizeof(int)) );
 
-	//checkCudaErrors( cudaMalloc( (void**) &device->Slopes, full_size * 8 * sizeof(double)) );
-
 	checkCudaErrors( cudaMalloc( (void**) &device->stonePtr, full_size * sizeof(double)) );
 	checkCudaErrors( cudaMalloc( (void**) &device->TotBPtr, full_size * sizeof(double)) );
 	checkCudaErrors( cudaMalloc( (void**) &device->soilMPtr, full_size * sizeof(double) ));
+
 
 	// now copy the necessary data - these will not overlap becasue they are all on the same stream
 
 	//checkCudaErrors(cudaSetDevice(0));
 	checkCudaErrors( cudaMemcpy( device->dem, data->dem, full_size * sizeof(double), cudaMemcpyHostToDevice)) ; // copy the non-raised DEM back to GPU
 	checkCudaErrors( cudaMemcpy( device->fd, data->fd, full_size * sizeof(int), cudaMemcpyHostToDevice)) ;
-	checkCudaErrors( cudaMemcpy( device->runoffweight, data->runoffweight, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
+	checkCudaErrors( cudaMemcpy( device->runoffweight, data->runoffweight, full_size * sizeof(double), cudaMemcpyHostToDevice));
+
 
 	checkCudaErrors( cudaMemcpy( device->rainmat, data->rainmat, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
 	checkCudaErrors( cudaMemcpy( device->tempmat, data->tempmat, full_size * sizeof(double), cudaMemcpyHostToDevice)) ;
@@ -139,6 +138,7 @@ void cleardevicespace_FA(Data* data, Data* device)
 	cudaFree(device->fd);
 	cudaFree(device->runoffweight);
 	cudaFree(device->fa);
+	//cudaFree(device->prop); // free prop space
 
 	//cudaFree(device->contribA); // free it here as it is no longer needed)
 
@@ -156,8 +156,6 @@ void setdevicespace_Process(Data* data, Data* device)
 	int ncell_x = data->mapInfo.width;
 	int ncell_y = data->mapInfo.height;
 	full_size= ncell_x * ncell_y;
-
-
 
 	checkCudaErrors( cudaMalloc( (void**) &device->fa,       full_size * sizeof(double)) );
 	checkCudaErrors( cudaMalloc( (void**) &device->fd,       full_size * sizeof(int))    );
@@ -180,7 +178,7 @@ void setdevicespace_Process(Data* data, Data* device)
 		// stones, TotBio, soilM plus dem, slopes and mask still on device
 		checkCudaErrors( cudaMemcpy ( device->fa,       data->fa,         full_size * sizeof(double), cudaMemcpyHostToDevice) );
 		checkCudaErrors( cudaMemcpy ( device->fd,       data->fd,         full_size * sizeof(int),    cudaMemcpyHostToDevice) );
-		checkCudaErrors( cudaMemcpy ( device->SFD,      data->fd,         full_size * sizeof(int),    cudaMemcpyHostToDevice) );
+		checkCudaErrors( cudaMemcpy ( device->SFD,      data->SFD,         full_size * sizeof(int),    cudaMemcpyHostToDevice) );
 		checkCudaErrors( cudaMemcpy ( device->SlopePtr,  data->SlopePtr,  full_size * sizeof(double), cudaMemcpyHostToDevice) );
 
 		checkCudaErrors( cudaMemcpy ( device->finesPtr, data->finesPtr,   full_size * sizeof(double), cudaMemcpyHostToDevice) );
@@ -210,9 +208,9 @@ void cleardevicespace_Process(Data* data, Data* device)
 	cudaFree(device->SFD);
 	cudaFree(device->fdmod);
 
-	cudaFree(device->Slopes);
+	//cudaFree(device->Slopes);
 	//cudaFree(device->SlopePtr); // do not free here as it will not be redeclared.
-	cudaFree(device->prop);
+	//cudaFree(device->prop);
 
 	cudaFree(device->rainmat);
 	cudaFree(device->tempmat);
@@ -300,12 +298,16 @@ void createDeviceSpace(Data* data, Data* device)
 	 int ncell_x = data->mapInfo.width;
 	 int ncell_y = data->mapInfo.height;
 	 fullsize= ncell_x * ncell_y;
+	 int fullsize8;
+	 fullsize8 = fullsize * 8 * sizeof(double);
 
 	 //cudaDeviceReset();
 
 	  checkCudaErrors( cudaMalloc((void **)&(device->dem), fullsize * sizeof(double)) );
 	  checkCudaErrors( cudaMalloc((void **)&(device->SlopePtr), fullsize * sizeof(double)) );
 	  checkCudaErrors( cudaMalloc((void **)&(device->summary), fullsize * sizeof(double)) );
+	  checkCudaErrors( cudaMalloc((void **)&(device->prop), fullsize8)); // create prop space on device
+	  checkCudaErrors( cudaMalloc((void **)&(device->Slopes), fullsize8)); // create prop space on device
 
 	fprintf(data->outlog,"Allocated DEM and slope matrices on device :%s\n", cudaGetErrorString(cudaGetLastError()));
 
@@ -327,6 +329,7 @@ int clearDeviceSpace(Data* data, Data* device)
 		cudaFree(device->SlopePtr);
 		cudaFree(device->summary);
 		cudaFree(device->Slopes);
+		cudaFree(device->prop);
 
 
 	cudaMemGetInfo(&freenow, &total);
@@ -352,6 +355,7 @@ int zerogrids(Data* data)
 	memset(data->depoPtr, 0.0, sizeof(data->depoPtr));
 
 	memset(data->fa, 0.0, sizeof(data->fa));
+	memset(data->runoffweight, 0.0, sizeof(data->runoffweight));
 
 	return 0;
 }
